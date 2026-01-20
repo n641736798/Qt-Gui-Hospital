@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/img">
         <file>maximize.svg</file>
         <file>minus.svg</file>
         <file>x.svg</file>
