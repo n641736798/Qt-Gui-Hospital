@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 6.10.1
+** Created by: Qt User Interface Compiler version 5.15.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -41,6 +41,7 @@ public:
     QPushButton *toggleButton;
     QPushButton *homeButton;
     QPushButton *patientsButton;
+    QPushButton *medicalRecordsButton;
     QPushButton *appointmentsButton;
     QSpacerItem *verticalSpacer;
     QPushButton *settingsButton;
@@ -100,14 +101,14 @@ public:
     void setupUi(QMainWindow *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())
-            MainWindow->setObjectName("MainWindow");
+            MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
         MainWindow->resize(800, 600);
         MainWindow->setStyleSheet(QString::fromUtf8("/* \344\270\273\347\252\227\344\275\223\350\203\214\346\231\257\350\211\262 */\n"
 "QMainWindow {\n"
 "    background-color: #F5E6D3;\n"
 "}"));
         centralwidget = new QWidget(MainWindow);
-        centralwidget->setObjectName("centralwidget");
+        centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         centralwidget->setStyleSheet(QString::fromUtf8("/* --- \346\230\216\344\272\256\346\232\226\350\211\262\350\260\203\345\214\273\351\231\242\347\256\241\347\220\206\347\263\273\347\273\237\344\270\273\351\242\230 --- */\n"
 "\n"
 "/* Main Window & Central Widget */\n"
@@ -327,66 +328,76 @@ public:
 ""));
         horizontalLayout = new QHBoxLayout(centralwidget);
         horizontalLayout->setSpacing(8);
-        horizontalLayout->setObjectName("horizontalLayout");
+        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
         horizontalLayout->setContentsMargins(8, 8, 8, 8);
         sidebar = new QWidget(centralwidget);
-        sidebar->setObjectName("sidebar");
+        sidebar->setObjectName(QString::fromUtf8("sidebar"));
         sidebar->setMinimumSize(QSize(200, 0));
         sidebar->setMaximumSize(QSize(200, 16777215));
         sidebarLayout = new QVBoxLayout(sidebar);
         sidebarLayout->setSpacing(8);
-        sidebarLayout->setObjectName("sidebarLayout");
+        sidebarLayout->setObjectName(QString::fromUtf8("sidebarLayout"));
         sidebarLayout->setContentsMargins(8, 8, 8, 8);
         toggleButton = new QPushButton(sidebar);
-        toggleButton->setObjectName("toggleButton");
+        toggleButton->setObjectName(QString::fromUtf8("toggleButton"));
         toggleButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon;
-        icon.addFile(QString::fromUtf8(":/img/health.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon.addFile(QString::fromUtf8(":/img/health.png"), QSize(), QIcon::Normal, QIcon::Off);
         toggleButton->setIcon(icon);
         toggleButton->setIconSize(QSize(24, 24));
 
         sidebarLayout->addWidget(toggleButton);
 
         homeButton = new QPushButton(sidebar);
-        homeButton->setObjectName("homeButton");
+        homeButton->setObjectName(QString::fromUtf8("homeButton"));
         homeButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon1;
-        icon1.addFile(QString::fromUtf8(":/img/Dashboard.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon1.addFile(QString::fromUtf8(":/img/Dashboard.png"), QSize(), QIcon::Normal, QIcon::Off);
         homeButton->setIcon(icon1);
         homeButton->setIconSize(QSize(24, 24));
 
         sidebarLayout->addWidget(homeButton);
 
         patientsButton = new QPushButton(sidebar);
-        patientsButton->setObjectName("patientsButton");
+        patientsButton->setObjectName(QString::fromUtf8("patientsButton"));
         patientsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon2;
-        icon2.addFile(QString::fromUtf8(":/img/Patients.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon2.addFile(QString::fromUtf8(":/img/Patients.png"), QSize(), QIcon::Normal, QIcon::Off);
         patientsButton->setIcon(icon2);
         patientsButton->setIconSize(QSize(24, 24));
 
         sidebarLayout->addWidget(patientsButton);
 
-        appointmentsButton = new QPushButton(sidebar);
-        appointmentsButton->setObjectName("appointmentsButton");
-        appointmentsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
+        medicalRecordsButton = new QPushButton(sidebar);
+        medicalRecordsButton->setObjectName(QString::fromUtf8("medicalRecordsButton"));
+        medicalRecordsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon3;
-        icon3.addFile(QString::fromUtf8(":/img/Appointments.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        appointmentsButton->setIcon(icon3);
+        icon3.addFile(QString::fromUtf8(":/img/Report.png"), QSize(), QIcon::Normal, QIcon::Off);
+        medicalRecordsButton->setIcon(icon3);
+        medicalRecordsButton->setIconSize(QSize(24, 24));
+
+        sidebarLayout->addWidget(medicalRecordsButton);
+
+        appointmentsButton = new QPushButton(sidebar);
+        appointmentsButton->setObjectName(QString::fromUtf8("appointmentsButton"));
+        appointmentsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
+        QIcon icon4;
+        icon4.addFile(QString::fromUtf8(":/img/Appointments.png"), QSize(), QIcon::Normal, QIcon::Off);
+        appointmentsButton->setIcon(icon4);
         appointmentsButton->setIconSize(QSize(24, 24));
 
         sidebarLayout->addWidget(appointmentsButton);
 
-        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Policy::Minimum, QSizePolicy::Policy::Expanding);
+        verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         sidebarLayout->addItem(verticalSpacer);
 
         settingsButton = new QPushButton(sidebar);
-        settingsButton->setObjectName("settingsButton");
+        settingsButton->setObjectName(QString::fromUtf8("settingsButton"));
         settingsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
-        QIcon icon4;
-        icon4.addFile(QString::fromUtf8(":/img/Settings.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        settingsButton->setIcon(icon4);
+        QIcon icon5;
+        icon5.addFile(QString::fromUtf8(":/img/Settings.png"), QSize(), QIcon::Normal, QIcon::Off);
+        settingsButton->setIcon(icon5);
         settingsButton->setIconSize(QSize(24, 24));
 
         sidebarLayout->addWidget(settingsButton);
@@ -395,46 +406,46 @@ public:
         horizontalLayout->addWidget(sidebar);
 
         frame = new QFrame(centralwidget);
-        frame->setObjectName("frame");
+        frame->setObjectName(QString::fromUtf8("frame"));
         frame->setFrameShape(QFrame::Shape::StyledPanel);
         frame->setFrameShadow(QFrame::Shadow::Raised);
         verticalLayout = new QVBoxLayout(frame);
         verticalLayout->setSpacing(6);
-        verticalLayout->setObjectName("verticalLayout");
+        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         verticalLayout->setContentsMargins(0, 0, 0, 0);
         topbar = new QFrame(frame);
-        topbar->setObjectName("topbar");
+        topbar->setObjectName(QString::fromUtf8("topbar"));
         topbar->setMaximumSize(QSize(16777215, 40));
         topbar->setFrameShape(QFrame::Shape::StyledPanel);
         topbar->setFrameShadow(QFrame::Shadow::Raised);
         horizontalLayout_2 = new QHBoxLayout(topbar);
-        horizontalLayout_2->setObjectName("horizontalLayout_2");
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         horizontalLayout_2->addItem(horizontalSpacer);
 
         pushButton_3 = new QPushButton(topbar);
-        pushButton_3->setObjectName("pushButton_3");
-        QIcon icon5;
-        icon5.addFile(QString::fromUtf8(":/img/minus.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        pushButton_3->setIcon(icon5);
+        pushButton_3->setObjectName(QString::fromUtf8("pushButton_3"));
+        QIcon icon6;
+        icon6.addFile(QString::fromUtf8(":/img/minus.svg"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_3->setIcon(icon6);
 
         horizontalLayout_2->addWidget(pushButton_3);
 
         pushButton_2 = new QPushButton(topbar);
-        pushButton_2->setObjectName("pushButton_2");
+        pushButton_2->setObjectName(QString::fromUtf8("pushButton_2"));
         pushButton_2->setMaximumSize(QSize(16777215, 16777215));
-        QIcon icon6;
-        icon6.addFile(QString::fromUtf8(":/img/maximize.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        pushButton_2->setIcon(icon6);
+        QIcon icon7;
+        icon7.addFile(QString::fromUtf8(":/img/maximize.svg"), QSize(), QIcon::Normal, QIcon::Off);
+        pushButton_2->setIcon(icon7);
 
         horizontalLayout_2->addWidget(pushButton_2);
 
         close = new QPushButton(topbar);
-        close->setObjectName("close");
-        QIcon icon7;
-        icon7.addFile(QString::fromUtf8(":/img/x.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        close->setIcon(icon7);
+        close->setObjectName(QString::fromUtf8("close"));
+        QIcon icon8;
+        icon8.addFile(QString::fromUtf8(":/img/x.svg"), QSize(), QIcon::Normal, QIcon::Off);
+        close->setIcon(icon8);
 
         horizontalLayout_2->addWidget(close);
 
@@ -442,41 +453,41 @@ public:
         verticalLayout->addWidget(topbar);
 
         content = new QFrame(frame);
-        content->setObjectName("content");
+        content->setObjectName(QString::fromUtf8("content"));
         content->setFrameShape(QFrame::Shape::StyledPanel);
         content->setFrameShadow(QFrame::Shadow::Raised);
         verticalLayout_4 = new QVBoxLayout(content);
-        verticalLayout_4->setObjectName("verticalLayout_4");
+        verticalLayout_4->setObjectName(QString::fromUtf8("verticalLayout_4"));
         contentStackWidget = new QStackedWidget(content);
-        contentStackWidget->setObjectName("contentStackWidget");
+        contentStackWidget->setObjectName(QString::fromUtf8("contentStackWidget"));
         homePage = new QWidget();
-        homePage->setObjectName("homePage");
+        homePage->setObjectName(QString::fromUtf8("homePage"));
         verticalLayout_2 = new QVBoxLayout(homePage);
-        verticalLayout_2->setObjectName("verticalLayout_2");
+        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
         statsGrid = new QGridLayout();
-        statsGrid->setObjectName("statsGrid");
+        statsGrid->setObjectName(QString::fromUtf8("statsGrid"));
         mainChartFrame = new QFrame(homePage);
-        mainChartFrame->setObjectName("mainChartFrame");
+        mainChartFrame->setObjectName(QString::fromUtf8("mainChartFrame"));
         mainChartLayout = new QVBoxLayout(mainChartFrame);
-        mainChartLayout->setObjectName("mainChartLayout");
+        mainChartLayout->setObjectName(QString::fromUtf8("mainChartLayout"));
         hboxLayout = new QHBoxLayout();
-        hboxLayout->setObjectName("hboxLayout");
+        hboxLayout->setObjectName(QString::fromUtf8("hboxLayout"));
         mainChartTitle = new QLabel(mainChartFrame);
-        mainChartTitle->setObjectName("mainChartTitle");
+        mainChartTitle->setObjectName(QString::fromUtf8("mainChartTitle"));
 
         hboxLayout->addWidget(mainChartTitle);
 
-        spacerItem = new QSpacerItem(0, 0, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        spacerItem = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         hboxLayout->addItem(spacerItem);
 
         op1Button = new QPushButton(mainChartFrame);
-        op1Button->setObjectName("op1Button");
+        op1Button->setObjectName(QString::fromUtf8("op1Button"));
 
         hboxLayout->addWidget(op1Button);
 
         op2Button = new QPushButton(mainChartFrame);
-        op2Button->setObjectName("op2Button");
+        op2Button->setObjectName(QString::fromUtf8("op2Button"));
 
         hboxLayout->addWidget(op2Button);
 
@@ -484,7 +495,7 @@ public:
         mainChartLayout->addLayout(hboxLayout);
 
         mainChartPlaceholder = new QGraphicsView(mainChartFrame);
-        mainChartPlaceholder->setObjectName("mainChartPlaceholder");
+        mainChartPlaceholder->setObjectName(QString::fromUtf8("mainChartPlaceholder"));
         mainChartPlaceholder->setStyleSheet(QString::fromUtf8(""));
 
         mainChartLayout->addWidget(mainChartPlaceholder);
@@ -493,16 +504,16 @@ public:
         statsGrid->addWidget(mainChartFrame, 0, 0, 1, 2);
 
         barChartFrame = new QFrame(homePage);
-        barChartFrame->setObjectName("barChartFrame");
+        barChartFrame->setObjectName(QString::fromUtf8("barChartFrame"));
         barChartLayout = new QVBoxLayout(barChartFrame);
-        barChartLayout->setObjectName("barChartLayout");
+        barChartLayout->setObjectName(QString::fromUtf8("barChartLayout"));
         barChartTitle = new QLabel(barChartFrame);
-        barChartTitle->setObjectName("barChartTitle");
+        barChartTitle->setObjectName(QString::fromUtf8("barChartTitle"));
 
         barChartLayout->addWidget(barChartTitle);
 
         barChartPlaceholder = new QGraphicsView(barChartFrame);
-        barChartPlaceholder->setObjectName("barChartPlaceholder");
+        barChartPlaceholder->setObjectName(QString::fromUtf8("barChartPlaceholder"));
         barChartPlaceholder->setStyleSheet(QString::fromUtf8(""));
 
         barChartLayout->addWidget(barChartPlaceholder);
@@ -511,16 +522,16 @@ public:
         statsGrid->addWidget(barChartFrame, 0, 2, 1, 2);
 
         donutChartFrame = new QFrame(homePage);
-        donutChartFrame->setObjectName("donutChartFrame");
+        donutChartFrame->setObjectName(QString::fromUtf8("donutChartFrame"));
         verticalLayout_5 = new QVBoxLayout(donutChartFrame);
-        verticalLayout_5->setObjectName("verticalLayout_5");
+        verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
         label = new QLabel(donutChartFrame);
-        label->setObjectName("label");
+        label->setObjectName(QString::fromUtf8("label"));
 
         verticalLayout_5->addWidget(label);
 
         donutChartPlaceholder = new QGraphicsView(donutChartFrame);
-        donutChartPlaceholder->setObjectName("donutChartPlaceholder");
+        donutChartPlaceholder->setObjectName(QString::fromUtf8("donutChartPlaceholder"));
         donutChartPlaceholder->setStyleSheet(QString::fromUtf8(""));
 
         verticalLayout_5->addWidget(donutChartPlaceholder);
@@ -529,16 +540,16 @@ public:
         statsGrid->addWidget(donutChartFrame, 1, 0, 1, 1);
 
         verticalBarFrame = new QFrame(homePage);
-        verticalBarFrame->setObjectName("verticalBarFrame");
+        verticalBarFrame->setObjectName(QString::fromUtf8("verticalBarFrame"));
         verticalLayout_6 = new QVBoxLayout(verticalBarFrame);
-        verticalLayout_6->setObjectName("verticalLayout_6");
+        verticalLayout_6->setObjectName(QString::fromUtf8("verticalLayout_6"));
         label_2 = new QLabel(verticalBarFrame);
-        label_2->setObjectName("label_2");
+        label_2->setObjectName(QString::fromUtf8("label_2"));
 
         verticalLayout_6->addWidget(label_2);
 
         verticalBarPlaceholder = new QGraphicsView(verticalBarFrame);
-        verticalBarPlaceholder->setObjectName("verticalBarPlaceholder");
+        verticalBarPlaceholder->setObjectName(QString::fromUtf8("verticalBarPlaceholder"));
         verticalBarPlaceholder->setStyleSheet(QString::fromUtf8(""));
 
         verticalLayout_6->addWidget(verticalBarPlaceholder);
@@ -551,28 +562,28 @@ public:
 
         contentStackWidget->addWidget(homePage);
         patientsPage = new QWidget();
-        patientsPage->setObjectName("patientsPage");
+        patientsPage->setObjectName(QString::fromUtf8("patientsPage"));
         verticalLayout_3 = new QVBoxLayout(patientsPage);
-        verticalLayout_3->setObjectName("verticalLayout_3");
+        verticalLayout_3->setObjectName(QString::fromUtf8("verticalLayout_3"));
         pageTitle = new QLabel(patientsPage);
-        pageTitle->setObjectName("pageTitle");
+        pageTitle->setObjectName(QString::fromUtf8("pageTitle"));
         pageTitle->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
 
         verticalLayout_3->addWidget(pageTitle);
 
         horizontalLayout_3 = new QHBoxLayout();
-        horizontalLayout_3->setObjectName("horizontalLayout_3");
+        horizontalLayout_3->setObjectName(QString::fromUtf8("horizontalLayout_3"));
         addPatientButton = new QPushButton(patientsPage);
-        addPatientButton->setObjectName("addPatientButton");
+        addPatientButton->setObjectName(QString::fromUtf8("addPatientButton"));
 
         horizontalLayout_3->addWidget(addPatientButton);
 
-        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        horizontalSpacer_2 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         horizontalLayout_3->addItem(horizontalSpacer_2);
 
         searchLineEdit = new QLineEdit(patientsPage);
-        searchLineEdit->setObjectName("searchLineEdit");
+        searchLineEdit->setObjectName(QString::fromUtf8("searchLineEdit"));
 
         horizontalLayout_3->addWidget(searchLineEdit);
 
@@ -580,51 +591,51 @@ public:
         verticalLayout_3->addLayout(horizontalLayout_3);
 
         patientsTableView = new QTableView(patientsPage);
-        patientsTableView->setObjectName("patientsTableView");
+        patientsTableView->setObjectName(QString::fromUtf8("patientsTableView"));
 
         verticalLayout_3->addWidget(patientsTableView);
 
         contentStackWidget->addWidget(patientsPage);
         appointmentsPage = new QWidget();
-        appointmentsPage->setObjectName("appointmentsPage");
+        appointmentsPage->setObjectName(QString::fromUtf8("appointmentsPage"));
         verticalLayout_8 = new QVBoxLayout(appointmentsPage);
-        verticalLayout_8->setObjectName("verticalLayout_8");
+        verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
         appointmentsPageTitle = new QLabel(appointmentsPage);
-        appointmentsPageTitle->setObjectName("appointmentsPageTitle");
+        appointmentsPageTitle->setObjectName(QString::fromUtf8("appointmentsPageTitle"));
 
         verticalLayout_8->addWidget(appointmentsPageTitle);
 
         horizontalLayout_4 = new QHBoxLayout();
         horizontalLayout_4->setSpacing(12);
-        horizontalLayout_4->setObjectName("horizontalLayout_4");
+        horizontalLayout_4->setObjectName(QString::fromUtf8("horizontalLayout_4"));
         calendarWidget = new QCalendarWidget(appointmentsPage);
-        calendarWidget->setObjectName("calendarWidget");
+        calendarWidget->setObjectName(QString::fromUtf8("calendarWidget"));
         calendarWidget->setLocale(QLocale(QLocale::English, QLocale::FalklandIslands));
 
         horizontalLayout_4->addWidget(calendarWidget);
 
         verticalLayout_9 = new QVBoxLayout();
-        verticalLayout_9->setObjectName("verticalLayout_9");
+        verticalLayout_9->setObjectName(QString::fromUtf8("verticalLayout_9"));
         label_6 = new QLabel(appointmentsPage);
-        label_6->setObjectName("label_6");
+        label_6->setObjectName(QString::fromUtf8("label_6"));
         label_6->setStyleSheet(QString::fromUtf8("font-size: 14pt; font-weight: bold;"));
 
         verticalLayout_9->addWidget(label_6);
 
         appointmentsTableView = new QTableView(appointmentsPage);
-        appointmentsTableView->setObjectName("appointmentsTableView");
+        appointmentsTableView->setObjectName(QString::fromUtf8("appointmentsTableView"));
 
         verticalLayout_9->addWidget(appointmentsTableView);
 
         addAppointmentButton = new QPushButton(appointmentsPage);
-        addAppointmentButton->setObjectName("addAppointmentButton");
+        addAppointmentButton->setObjectName(QString::fromUtf8("addAppointmentButton"));
 
         verticalLayout_9->addWidget(addAppointmentButton);
 
 
         horizontalLayout_4->addLayout(verticalLayout_9);
 
-        horizontalSpacer_3 = new QSpacerItem(0, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
+        horizontalSpacer_3 = new QSpacerItem(0, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Minimum);
 
         horizontalLayout_4->addItem(horizontalSpacer_3);
 
@@ -657,6 +668,7 @@ public:
         toggleButton->setText(QCoreApplication::translate("MainWindow", "\345\214\273\351\231\242\347\263\273\347\273\237", nullptr));
         homeButton->setText(QCoreApplication::translate("MainWindow", "\344\273\252\350\241\250\347\233\230", nullptr));
         patientsButton->setText(QCoreApplication::translate("MainWindow", "\346\202\243\350\200\205\347\256\241\347\220\206", nullptr));
+        medicalRecordsButton->setText(QCoreApplication::translate("MainWindow", "\347\227\205\345\216\206\347\256\241\347\220\206", nullptr));
         appointmentsButton->setText(QCoreApplication::translate("MainWindow", "\351\242\204\347\272\246\347\256\241\347\220\206", nullptr));
         settingsButton->setText(QCoreApplication::translate("MainWindow", "\347\263\273\347\273\237\350\256\276\347\275\256", nullptr));
         pushButton_3->setText(QString());

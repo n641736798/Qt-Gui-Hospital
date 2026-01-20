@@ -18,7 +18,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , dbManager(new DatabaseManager(this))
+    , dbManager(&DatabaseManager::instance())
     , ecgDataThread(new ECGDataThread(this))
     , axisUpdateCounter(0)
     , chartUpdateTimer(new QTimer(this))
@@ -79,6 +79,7 @@ MainWindow::MainWindow(QWidget *parent)
     alignButtons();
     setupDatabase();
     setupPatientsPage();
+    setupMedicalRecordsPage();
     setupECGDashboard();
     setupECGThread();
 
@@ -240,7 +241,8 @@ void MainWindow::setupPatientsPage()
     // Patient table
     patientTable = new QTableWidget();
     patientTable->setColumnCount(7);
-    QStringList headers = {"编号", "姓名", "电话", "邮箱", "出生日期", "性别", "病史"};
+    QStringList headers;
+    headers << "编号" << "姓名" << "电话" << "邮箱" << "出生日期" << "性别" << "病史";
     patientTable->setHorizontalHeaderLabels(headers);
     
     patientTable->setStyleSheet(R"(
@@ -286,6 +288,25 @@ void MainWindow::setupPatientsPage()
     
     // Load initial data
     refreshPatientTable();
+}
+
+void MainWindow::setupMedicalRecordsPage()
+{
+    // Create the medical record widget
+    medicalRecordWidget = new MedicalRecordWidget(this);
+    
+    // Add it to the stacked widget between patients and appointments
+    // Find the index of appointmentsPage
+    int appointmentsIndex = ui->contentStackWidget->indexOf(ui->appointmentsPage);
+    
+    // Insert the medical records page before appointments
+    ui->contentStackWidget->insertWidget(appointmentsIndex, medicalRecordWidget);
+    
+    // Connect database signals to refresh medical records when patient data changes
+    connect(dbManager, &DatabaseManager::patientDataChanged,
+            medicalRecordWidget, &MedicalRecordWidget::refreshData);
+    connect(dbManager, &DatabaseManager::patientDeleted,
+            medicalRecordWidget, &MedicalRecordWidget::refreshData);
 }
 
 void MainWindow::refreshPatientTable()
@@ -485,8 +506,10 @@ void MainWindow::setupECGDashboard()
     statsGrid->addWidget(ecgFrames[3], 1, 2, 1, 2); // 右下，跨2列
 
     // 创建4通道心电图
-    QStringList channelNames = {"导联 I", "导联 II", "导联 III", "导联 aVR"};
+    QStringList channelNames;
+    channelNames << "导联 I" << "导联 II" << "导联 III" << "导联 aVR";
     
+#ifndef NO_QT_CHARTS
     // 清空之前的系列和视图
     ecgSeries.clear();
     ecgChartViews.clear();
@@ -541,6 +564,20 @@ void MainWindow::setupECGDashboard()
         
         ecgLayouts[i]->addWidget(chartView);
     }
+#else
+    // Qt Charts disabled - show placeholder labels
+    for (int i = 0; i < 4; ++i) {
+        QLabel *titleLabel = new QLabel(channelNames[i]);
+        titleLabel->setStyleSheet("color: #8B4513; font-size: 14pt; font-weight: bold; padding: 5px;");
+        ecgLayouts[i]->addWidget(titleLabel);
+        
+        QLabel *placeholder = new QLabel("ECG Chart (Qt Charts module disabled)");
+        placeholder->setAlignment(Qt::AlignCenter);
+        placeholder->setStyleSheet("color: #999; font-size: 12pt; padding: 50px;");
+        placeholder->setMinimumHeight(150);
+        ecgLayouts[i]->addWidget(placeholder);
+    }
+#endif
 }
 
 void MainWindow::setupECGThread()
@@ -598,6 +635,7 @@ void MainWindow::updateECGDisplay(const ECGDataPoint &data)
 
 void MainWindow::batchUpdateCharts()
 {
+#ifndef NO_QT_CHARTS
     // 批量更新所有图表
     for (int i = 0; i < 4 && i < ecgSeries.size(); ++i) {
         QLineSeries *series = ecgSeries[i];
@@ -626,15 +664,19 @@ void MainWindow::batchUpdateCharts()
             }
         }
     }
+#endif // NO_QT_CHARTS
 }
 
 
 void MainWindow::alignButtons()
 {
     for (int i = 0; i < ui->sidebarLayout->count(); ++i) {
-        QWidget *widget = ui->sidebarLayout->itemAt(i)->widget();
-        if (QPushButton *button = qobject_cast<QPushButton*>(widget)) {
-            button->setLayoutDirection(Qt::LeftToRight);
+        QLayoutItem *item = ui->sidebarLayout->itemAt(i);
+        if (item && item->widget()) {
+            QWidget *widget = item->widget();
+            if (QPushButton *button = qobject_cast<QPushButton*>(widget)) {
+                button->setLayoutDirection(Qt::LeftToRight);
+            }
         }
     }
 }
@@ -645,15 +687,17 @@ void MainWindow::onToggleButtonClicked()
     int endWidth = isSidebarOpen ? 60 : 200;
 
     // 根据侧边栏状态设置按钮文字显示
-    QList<QPushButton*> buttons = {
-        ui->toggleButton,
-        ui->homeButton,
-        ui->patientsButton,
-        ui->appointmentsButton,
-        ui->settingsButton
-    };
+    QList<QPushButton*> buttons;
+    buttons << ui->toggleButton
+            << ui->homeButton
+            << ui->patientsButton
+            << ui->medicalRecordsButton
+            << ui->appointmentsButton
+            << ui->settingsButton;
     
     for (QPushButton* button : buttons) {
+        if (!button) continue;
+        
         if (isSidebarOpen) {
             // 缩进时只显示图标，隐藏文字
             button->setText("");
@@ -665,6 +709,8 @@ void MainWindow::onToggleButtonClicked()
                 button->setText("仪表盘");
             } else if (button == ui->patientsButton) {
                 button->setText("患者管理");
+            } else if (button == ui->medicalRecordsButton) {
+                button->setText("病历管理");
             } else if (button == ui->appointmentsButton) {
                 button->setText("预约管理");
             } else if (button == ui->settingsButton) {
@@ -685,7 +731,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
         if (ui->topbar->geometry().contains(event->pos())) {
             dragging = true;
-            dragPosition = event->globalPos() - frameGeometry().topLeft();
+            dragPosition = event->globalPosition().toPoint() - frameGeometry().topLeft();
             event->accept();
         }
     }
@@ -693,12 +739,13 @@ void MainWindow::mousePressEvent(QMouseEvent *event) {
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event) {
     if (dragging && (event->buttons() & Qt::LeftButton)) {
-        move(event->globalPos() - dragPosition);
+        move(event->globalPosition().toPoint() - dragPosition);
         event->accept();
     }
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event) {
+    Q_UNUSED(event);
     dragging = false;
 }
 
@@ -744,6 +791,11 @@ void MainWindow::on_appointmentsButton_clicked()
     ui->contentStackWidget->setCurrentWidget(ui->appointmentsPage);
 }
 
+void MainWindow::on_medicalRecordsButton_clicked()
+{
+    ui->contentStackWidget->setCurrentWidget(medicalRecordWidget);
+}
+
 bool MainWindow::createDatabaseIfNotExists(const QString &host, const QString &username, const QString &password)
 {
     // Create a temporary database connection without specifying a database
@@ -784,9 +836,15 @@ void MainWindow::setChildrenBackground(QWidget *widget, const QColor &color)
     QList<QWidget*> children = widget->findChildren<QWidget*>();
     for (QWidget *child : children) {
         // 跳过图表组件，避免影响图表显示
+#ifndef NO_QT_CHARTS
         if (child->inherits("QChartView") || child->inherits("QGraphicsView")) {
             continue;
         }
+#else
+        if (child->inherits("QGraphicsView")) {
+            continue;
+        }
+#endif
         
         // 跳过已经有白色背景的卡片
         if (child->objectName().contains("Frame") && 

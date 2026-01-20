@@ -7,6 +7,7 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QChart>
 #include <QtCharts/QValueAxis>
+#include <QtCharts/QChartGlobal>
 #include <QMouseEvent>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -18,6 +19,7 @@
 #include "databasemanager.h"
 #include "patientdialog.h"
 #include "ecgdatathread.h"
+#include "medicalrecordwidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -44,6 +46,7 @@ private slots:
     void on_patientsButton_clicked();
     void on_homeButton_clicked();
     void on_appointmentsButton_clicked();
+    void on_medicalRecordsButton_clicked();
 
     // Database and patient management slots
     void onAddPatientClicked();
@@ -65,6 +68,7 @@ private:
     void alignButtons();
     void setupECGDashboard();
     void setupPatientsPage();
+    void setupMedicalRecordsPage();
     void setupDatabase();
     bool createDatabaseIfNotExists(const QString &host, const QString &username, const QString &password);
     void populatePatientTable(const QList<Patient> &patients);
@@ -83,10 +87,15 @@ private:
     QPushButton *editPatientBtn;
     QPushButton *deletePatientBtn;
     
+    // Medical record management widget
+    MedicalRecordWidget *medicalRecordWidget;
+    
     // ECG Dashboard
     ECGDataThread *ecgDataThread;
+#ifndef NO_QT_CHARTS
     QList<QLineSeries*> ecgSeries;
     QList<QChartView*> ecgChartViews;
+#endif
     QList<QList<QPointF>> ecgDataBuffers; // 为每个导联存储数据点
     static const int MAX_DATA_POINTS = 50; // 最大显示数据点数
     int axisUpdateCounter; // 坐标轴更新计数器

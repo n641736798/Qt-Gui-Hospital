@@ -1,8 +1,13 @@
-QT += core gui charts sql
+QT += core gui sql
+# Enable Qt Charts module for ECG dashboard
+QT += charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
+
+## NO_QT_CHARTS was previously used to disable charts when the module
+## was unavailable. It is now removed to enable real ECG charts.
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -14,18 +19,26 @@ SOURCES += \
     src/mainwindow.cpp \
     src/databasemanager.cpp \
     src/patientdialog.cpp \
-    src/ecgdatathread.cpp
+    src/ecgdatathread.cpp \
+    src/medicalrecordmodel.cpp \
+    src/medicalrecordwidget.cpp \
+    src/medicalrecorddialog.cpp
 
 # 头文件路径
 HEADERS += \
     include/mainwindow.h \
     include/databasemanager.h \
     include/patientdialog.h \
-    include/ecgdatathread.h
+    include/ecgdatathread.h \
+    include/medicalrecordmodel.h \
+    include/medicalrecordwidget.h \
+    include/medicalrecorddialog.h
 
 # UI文件路径
 FORMS += \
-    ui/mainwindow.ui
+    ui/mainwindow.ui \
+    ui/medicalrecordwidget.ui \
+    ui/medicalrecorddialog.ui
 
 # 资源文件路径
 RESOURCES += \
