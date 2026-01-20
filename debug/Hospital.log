@@ -1,0 +1,6 @@
+﻿  Generate moc_predefs.h
+   Qt/MSBuild: 3.4.1.0
+   Qt: 6.10.1
+  Rcc'ing resources.qrc...
+   RCC: Error in 'D:\study\C++编程相关\Qt项目\Qt-Gui-Hospital-main\Qt-Gui-Hospital-main\resources.qrc': Cannot find file 'img/maximize.svg'
+C:\Users\64173\AppData\Local\QtMsBuild\qt_work.targets(136,5): error MSB4181: “QtRunWork”任务返回了 false，但未记录错误。

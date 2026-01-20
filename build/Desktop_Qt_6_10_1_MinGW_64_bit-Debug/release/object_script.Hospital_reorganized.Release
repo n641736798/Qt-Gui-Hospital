@@ -1,0 +1,10 @@
+release/main.o
+release/mainwindow.o
+release/databasemanager.o
+release/patientdialog.o
+release/ecgdatathread.o
+release/qrc_resources.o
+release/moc_mainwindow.o
+release/moc_databasemanager.o
+release/moc_patientdialog.o
+release/moc_ecgdatathread.o
