@@ -3,11 +3,6 @@
 
 #include <QMainWindow>
 #include <QPropertyAnimation>
-#include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QChart>
-#include <QtCharts/QValueAxis>
-#include <QtCharts/QChartGlobal>
 #include <QMouseEvent>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -20,6 +15,7 @@
 #include "patientdialog.h"
 #include "ecgdatathread.h"
 #include "medicalrecordwidget.h"
+#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -92,12 +88,9 @@ private:
     
     // ECG Dashboard
     ECGDataThread *ecgDataThread;
-#ifndef NO_QT_CHARTS
-    QList<QLineSeries*> ecgSeries;
-    QList<QChartView*> ecgChartViews;
-#endif
+    QList<QCustomPlot*> ecgPlots;
     QList<QList<QPointF>> ecgDataBuffers; // 为每个导联存储数据点
-    static const int MAX_DATA_POINTS = 50; // 最大显示数据点数
+    static const int MAX_DATA_POINTS = 200; // 最大显示数据点数
     int axisUpdateCounter; // 坐标轴更新计数器
     QTimer *chartUpdateTimer; // 图表更新定时器
     void setupECGThread();

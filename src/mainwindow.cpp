@@ -1,18 +1,17 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "qcustomplot.h"
 
-#include <QPainter>
 #include <QPen>
 #include <QPalette>
 #include <QTimer>
-#include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
-#include <QtCharts/QChart>
-#include <QtCharts/QValueAxis>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QFrame>
+#include <QGridLayout>
 #include <QSplitter>
+#include <QVector>
 #include <cmath>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -505,79 +504,52 @@ void MainWindow::setupECGDashboard()
     statsGrid->addWidget(ecgFrames[2], 1, 0, 1, 2); // 左下，跨2列
     statsGrid->addWidget(ecgFrames[3], 1, 2, 1, 2); // 右下，跨2列
 
-    // 创建4通道心电图
+    // 创建4通道心电图（QCustomPlot）
     QStringList channelNames;
     channelNames << "导联 I" << "导联 II" << "导联 III" << "导联 aVR";
-    
-#ifndef NO_QT_CHARTS
-    // 清空之前的系列和视图
-    ecgSeries.clear();
-    ecgChartViews.clear();
-    
+
+    ecgPlots.clear();
+
     for (int i = 0; i < 4; ++i) {
         // 创建标题标签
         QLabel *titleLabel = new QLabel(channelNames[i]);
         titleLabel->setStyleSheet("color: #8B4513; font-size: 14pt; font-weight: bold; padding: 5px;");
         ecgLayouts[i]->addWidget(titleLabel);
-        
-        // 创建心电图数据系列
-        QLineSeries *series = new QLineSeries();
-        ecgSeries.append(series);
-        
-        // 创建图表
-        QChart *chart = new QChart();
-        chart->addSeries(series);
-        chart->legend()->hide();
-        chart->setTitle("");
-        chart->setBackgroundBrush(QBrush(QColor("#FFFFFF")));
-        chart->setMargins(QMargins(0, 0, 0, 0));
-        
-        // 设置心电图线条样式
-        QPen seriesPen(QColor("#FF4444")); // 红色心电图线
-        seriesPen.setWidth(2);
-        series->setPen(seriesPen);
-        
-        // 设置坐标轴
-        QValueAxis *axisX = new QValueAxis();
-        axisX->setRange(0, 10);
-        axisX->setGridLineVisible(true);
-        axisX->setGridLineColor(QColor("#E0E0E0"));
-        axisX->setLabelsVisible(false);
-        axisX->setLineVisible(false);
-        chart->addAxis(axisX, Qt::AlignBottom);
-        series->attachAxis(axisX);
-        
-        QValueAxis *axisY = new QValueAxis();
-        axisY->setRange(-2, 2);
-        axisY->setGridLineVisible(true);
-        axisY->setGridLineColor(QColor("#E0E0E0"));
-        axisY->setLabelsVisible(false);
-        axisY->setLineVisible(false);
-        chart->addAxis(axisY, Qt::AlignLeft);
-        series->attachAxis(axisY);
-        
-        // 创建图表视图
-        QChartView *chartView = new QChartView(chart);
-        chartView->setRenderHint(QPainter::Antialiasing);
-        chartView->setMinimumHeight(150);
-        ecgChartViews.append(chartView);
-        
-        ecgLayouts[i]->addWidget(chartView);
+
+        // 创建 QCustomPlot
+        QCustomPlot *customPlot = new QCustomPlot();
+        ecgPlots.append(customPlot);
+
+        customPlot->addGraph();
+        QCPGraph *graph = customPlot->graph(0);
+
+        QPen pen(QColor("#FF4444"));
+        pen.setWidth(2);
+        graph->setPen(pen);
+
+        QCPAxis *xAxis = customPlot->xAxis;
+        xAxis->setRange(0, 10);
+        xAxis->grid()->setVisible(true);
+        xAxis->grid()->setPen(QPen(QColor("#E0E0E0"), 1, Qt::DotLine));
+        xAxis->setTicks(false);
+        xAxis->setTickLabels(false);
+        xAxis->setBasePen(Qt::NoPen);
+        xAxis->setSubTicks(false);
+
+        QCPAxis *yAxis = customPlot->yAxis;
+        yAxis->setRange(-2, 2);
+        yAxis->grid()->setVisible(true);
+        yAxis->grid()->setPen(QPen(QColor("#E0E0E0"), 1, Qt::DotLine));
+        yAxis->setTicks(false);
+        yAxis->setTickLabels(false);
+        yAxis->setBasePen(Qt::NoPen);
+        yAxis->setSubTicks(false);
+
+        customPlot->setBackground(QBrush(QColor("#FFFFFF")));
+        customPlot->setMinimumHeight(150);
+
+        ecgLayouts[i]->addWidget(customPlot);
     }
-#else
-    // Qt Charts disabled - show placeholder labels
-    for (int i = 0; i < 4; ++i) {
-        QLabel *titleLabel = new QLabel(channelNames[i]);
-        titleLabel->setStyleSheet("color: #8B4513; font-size: 14pt; font-weight: bold; padding: 5px;");
-        ecgLayouts[i]->addWidget(titleLabel);
-        
-        QLabel *placeholder = new QLabel("ECG Chart (Qt Charts module disabled)");
-        placeholder->setAlignment(Qt::AlignCenter);
-        placeholder->setStyleSheet("color: #999; font-size: 12pt; padding: 50px;");
-        placeholder->setMinimumHeight(150);
-        ecgLayouts[i]->addWidget(placeholder);
-    }
-#endif
 }
 
 void MainWindow::setupECGThread()
@@ -635,36 +607,41 @@ void MainWindow::updateECGDisplay(const ECGDataPoint &data)
 
 void MainWindow::batchUpdateCharts()
 {
-#ifndef NO_QT_CHARTS
-    // 批量更新所有图表
-    for (int i = 0; i < 4 && i < ecgSeries.size(); ++i) {
-        QLineSeries *series = ecgSeries[i];
-        
+    for (int i = 0; i < 4 && i < ecgPlots.size() && i < ecgDataBuffers.size(); ++i) {
+        QCustomPlot *plot = ecgPlots[i];
+        QCPGraph *graph = plot->graph(0);
+
         if (!ecgDataBuffers[i].isEmpty()) {
-            // 只有当缓冲区有数据时才更新
-            series->replace(ecgDataBuffers[i]);
+            QVector<double> keys, values;
+            keys.reserve(ecgDataBuffers[i].size());
+            values.reserve(ecgDataBuffers[i].size());
+
+            for (const QPointF &point : ecgDataBuffers[i]) {
+                keys.append(point.x());
+                values.append(point.y());
+            }
+
+            graph->setData(keys, values);
         }
     }
-    
-    // 减少坐标轴更新频率
+
     axisUpdateCounter++;
-    if (axisUpdateCounter >= 10) { // 每1秒更新一次坐标轴
+    if (axisUpdateCounter >= 10) {
         axisUpdateCounter = 0;
-        
-        // 更新X轴范围以实现滚动效果
-        for (int i = 0; i < 4 && i < ecgChartViews.size(); ++i) {
+
+        for (int i = 0; i < 4 && i < ecgPlots.size() && i < ecgDataBuffers.size(); ++i) {
             if (!ecgDataBuffers[i].isEmpty()) {
-                QChart *chart = ecgChartViews[i]->chart();
-                QValueAxis *axisX = qobject_cast<QValueAxis*>(chart->axes(Qt::Horizontal).first());
-                if (axisX) {
-                    double currentTime = ecgDataBuffers[i].last().x();
-                    double windowSize = 10.0; // 10秒窗口
-                    axisX->setRange(currentTime - windowSize, currentTime);
-                }
+                QCustomPlot *plot = ecgPlots[i];
+                double currentTime = ecgDataBuffers[i].last().x();
+                double windowSize = 10.0;
+                plot->xAxis->setRange(currentTime - windowSize, currentTime);
             }
         }
     }
-#endif // NO_QT_CHARTS
+
+    for (QCustomPlot *plot : ecgPlots) {
+        plot->replot();
+    }
 }
 
 
@@ -835,17 +812,10 @@ void MainWindow::setChildrenBackground(QWidget *widget, const QColor &color)
     // 递归设置所有子组件
     QList<QWidget*> children = widget->findChildren<QWidget*>();
     for (QWidget *child : children) {
-        // 跳过图表组件，避免影响图表显示
-#ifndef NO_QT_CHARTS
-        if (child->inherits("QChartView") || child->inherits("QGraphicsView")) {
+        if (child->inherits("QCustomPlot")) {
             continue;
         }
-#else
-        if (child->inherits("QGraphicsView")) {
-            continue;
-        }
-#endif
-        
+
         // 跳过已经有白色背景的卡片
         if (child->objectName().contains("Frame") && 
             child->styleSheet().contains("background-color: #FFFFFF")) {
