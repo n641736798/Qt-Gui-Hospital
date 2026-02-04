@@ -11,10 +11,14 @@
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QTimer>
+#include <QColor>
+#include <QPoint>
 #include "databasemanager.h"
 #include "patientdialog.h"
 #include "ecgdatathread.h"
 #include "medicalrecordwidget.h"
+#include "medicalrecorddialog.h"
+#include "patientwidget.h"
 #include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
@@ -52,22 +56,36 @@ private slots:
     void onPatientTableDoubleClicked(int row, int column);
     void refreshPatientTable();
     void updateDashboardWithRealData();
+
+    // 病历管理（非 MVC）槽函数
+    void onAddRecordClicked();
+    void onEditRecordClicked();
+    void onDeleteRecordClicked();
+    void onSearchMedicalRecords();
+    void refreshMedicalRecordTable();
     
     // ECG data handling slots
     void onECGDataReceived(const ECGDataPoint &data);
 
 private:
+    struct MvcConfig {
+        bool patients = false;         // 默认：患者管理使用非 MVC（当前实现）
+        bool medicalRecords = true;    // 默认：病历管理使用 MVC（当前实现）
+    };
+
     Ui::MainWindow *ui;
     bool isSidebarOpen = true; // Sidebar starts open as per the UI file
     QPropertyAnimation *sidebarAnimation;
 
     void alignButtons();
+    void loadAppConfig();
     void setupECGDashboard();
     void setupPatientsPage();
     void setupMedicalRecordsPage();
     void setupDatabase();
     bool createDatabaseIfNotExists(const QString &host, const QString &username, const QString &password);
     void populatePatientTable(const QList<Patient> &patients);
+    void populateMedicalRecordTable(const QList<MedicalRecord> &records);
     void setChildrenBackground(QWidget *widget, const QColor &color);
 
     bool dragging = false;
@@ -82,9 +100,17 @@ private:
     QPushButton *addPatientBtn;
     QPushButton *editPatientBtn;
     QPushButton *deletePatientBtn;
-    
-    // Medical record management widget
-    MedicalRecordWidget *medicalRecordWidget;
+
+    // 病历管理：MVC 时为 MedicalRecordWidget，非 MVC 时为带 QTableWidget 的容器
+    MedicalRecordWidget *medicalRecordWidget = nullptr;
+    QWidget *medicalRecordsStackPage = nullptr;  // 栈中当前病历页（MVC 或非 MVC）
+
+    // 病历管理（非 MVC）控件
+    QTableWidget *medicalRecordTable = nullptr;
+    QLineEdit *medicalRecordSearchEdit = nullptr;
+    QPushButton *addRecordBtn = nullptr;
+    QPushButton *editRecordBtn = nullptr;
+    QPushButton *deleteRecordBtn = nullptr;
     
     // ECG Dashboard
     ECGDataThread *ecgDataThread;
@@ -96,6 +122,8 @@ private:
     void setupECGThread();
     void updateECGDisplay(const ECGDataPoint &data);
     void batchUpdateCharts(); // 批量更新图表
+
+    MvcConfig mvcConfig;
 };
 
 #endif // MAINWINDOW_H

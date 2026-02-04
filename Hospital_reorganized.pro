@@ -26,7 +26,9 @@ SOURCES += \
     src/medicalrecordmodel.cpp \
     src/medicalrecordwidget.cpp \
     src/medicalrecorddialog.cpp \
-    src/qcustomplot.cpp
+    src/qcustomplot.cpp \
+    src/patientmodel.cpp \
+    src/patientwidget.cpp
 
 # 头文件路径（qcustomplot.h 须在 HEADERS 中，以便对 Q_OBJECT/signals 运行 MOC）
 HEADERS += \
@@ -37,7 +39,9 @@ HEADERS += \
     include/medicalrecordmodel.h \
     include/medicalrecordwidget.h \
     include/medicalrecorddialog.h \
-    include/qcustomplot.h
+    include/qcustomplot.h \
+    include/patientmodel.h \
+    include/patientwidget.h
 
 # UI文件路径
 FORMS += \

@@ -12,6 +12,13 @@
 #include <QGridLayout>
 #include <QSplitter>
 #include <QVector>
+#include <QFile>
+#include <QDir>
+#include <QCoreApplication>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QJsonParseError>
 #include <cmath>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -76,6 +83,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     alignButtons();
+    loadAppConfig();
     setupDatabase();
     setupPatientsPage();
     setupMedicalRecordsPage();
@@ -92,6 +100,76 @@ MainWindow::MainWindow(QWidget *parent)
         // 递归设置所有子组件的背景色
         setChildrenBackground(this, QColor("#F5E6D3"));
     });
+}
+
+void MainWindow::loadAppConfig()
+{
+    // 默认配置：保持当前行为
+    mvcConfig.patients = false;        // 患者管理默认使用非 MVC
+    mvcConfig.medicalRecords = true;   // 病历管理默认使用 MVC
+
+    // 在若干典型路径中查找配置文件，适配不同运行目录
+    QStringList candidatePaths;
+    const QString appDirPath = QCoreApplication::applicationDirPath();
+    QDir appDir(appDirPath);
+
+    // 典型目录结构示例：
+    //   项目根/
+    //     config/app_config.json          <-- 配置实际所在位置
+    //     build/Kit-Debug/debug/Hospital_reorganized.exe
+    //
+    // applicationDirPath() 一般是 build/.../debug 目录，
+    // 所以需要向上 3 级才能回到项目根，再进入 config。
+    candidatePaths << appDir.filePath("config/app_config.json");        // 与可执行文件同级的 config/
+    candidatePaths << appDir.filePath("../config/app_config.json");     // 上一级目录的 config/
+    candidatePaths << appDir.filePath("../../config/app_config.json");  // 上上级目录的 config/（保留以兼容旧结构）
+    candidatePaths << appDir.filePath("../../../config/app_config.json"); // 返回到项目根的 config/
+
+    QString configPath;
+    for (const QString &path : candidatePaths) {
+        if (QFile::exists(path)) {
+            configPath = path;
+            break;
+        }
+    }
+
+    if (configPath.isEmpty()) {
+        qDebug() << "[MainWindow] app_config.json not found, using default MVC config."
+                 << "searched from" << appDirPath;
+        return;
+    }
+
+    QFile file(configPath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qDebug() << "[MainWindow] Failed to open app_config.json, using default MVC config:"
+                 << file.errorString();
+        return;
+    }
+
+    const QByteArray data = file.readAll();
+    QJsonParseError parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+    if (parseError.error != QJsonParseError::NoError || !doc.isObject()) {
+        qDebug() << "[MainWindow] Failed to parse app_config.json, using default MVC config:"
+                 << parseError.errorString();
+        return;
+    }
+
+    QJsonObject root = doc.object();
+    if (root.contains("mvc") && root.value("mvc").isObject()) {
+        QJsonObject mvcObj = root.value("mvc").toObject();
+
+        if (mvcObj.contains("patients")) {
+            mvcConfig.patients = mvcObj.value("patients").toBool(mvcConfig.patients);
+        }
+        if (mvcObj.contains("medical_records")) {
+            mvcConfig.medicalRecords = mvcObj.value("medical_records").toBool(mvcConfig.medicalRecords);
+        }
+    }
+
+    qDebug() << "[MainWindow] MVC config loaded from" << configPath
+             << "patients MVC =" << mvcConfig.patients
+             << "medical_records MVC =" << mvcConfig.medicalRecords;
 }
 
 MainWindow::~MainWindow()
@@ -146,166 +224,297 @@ void MainWindow::setupDatabase()
 
 void MainWindow::setupPatientsPage()
 {
-    // Get the patients page widget
     QWidget *patientsPage = ui->patientsPage;
-    
-    // Clear existing layout if any
+
+    // 清理旧布局
     if (patientsPage->layout()) {
         delete patientsPage->layout();
     }
-    
-    // Create main layout
-    QVBoxLayout *mainLayout = new QVBoxLayout(patientsPage);
-    mainLayout->setContentsMargins(20, 20, 20, 20);
-    mainLayout->setSpacing(15);
-    
-    // Title
-    QLabel *titleLabel = new QLabel("患者信息管理");
-    titleLabel->setStyleSheet("font-size: 24px; font-weight: bold; color: #8B4513; margin-bottom: 10px;");
-    mainLayout->addWidget(titleLabel);
-    
-    // Search and buttons layout
-    QHBoxLayout *topLayout = new QHBoxLayout();
-    
-    // Search
-    QLabel *searchLabel = new QLabel("搜索:");
-    searchLabel->setStyleSheet("color: #8B4513; font-weight: bold;");
-    searchEdit = new QLineEdit();
-    searchEdit->setPlaceholderText("按姓名、电话或邮箱搜索...");
-    searchEdit->setStyleSheet(R"(
-        QLineEdit {
-            background-color: #FFFFFF;
-            border: 1px solid #D2B48C;
-            border-radius: 6px;
-            padding: 8px;
-            color: #8B4513;
-            font-size: 14px;
-        }
-        QLineEdit:focus {
-            border-color: #FF8C42;
-        }
-    )");
-    
-    connect(searchEdit, &QLineEdit::textChanged, this, &MainWindow::onSearchPatients);
-    
-    topLayout->addWidget(searchLabel);
-    topLayout->addWidget(searchEdit);
-    topLayout->addStretch();
-    
-    // Buttons
-    addPatientBtn = new QPushButton("添加患者");
-    editPatientBtn = new QPushButton("编辑患者");
-    deletePatientBtn = new QPushButton("删除患者");
-    
-    QString buttonStyle = R"(
-        QPushButton {
-            background-color: #FF8C42;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 6px;
-            padding: 10px 20px;
-            font-weight: bold;
-            font-size: 14px;
-            min-width: 100px;
-        }
-        QPushButton:hover {
-            background-color: #FF9F5A;
-        }
-        QPushButton:pressed {
-            background-color: #E6793A;
-        }
-        QPushButton:disabled {
-            background-color: #D2B48C;
-            color: #CD853F;
-        }
-    )";
-    
-    addPatientBtn->setStyleSheet(buttonStyle);
-    editPatientBtn->setStyleSheet(buttonStyle);
-    deletePatientBtn->setStyleSheet(buttonStyle);
-    
-    editPatientBtn->setEnabled(false);
-    deletePatientBtn->setEnabled(false);
-    
-    connect(addPatientBtn, &QPushButton::clicked, this, &MainWindow::onAddPatientClicked);
-    connect(editPatientBtn, &QPushButton::clicked, this, &MainWindow::onEditPatientClicked);
-    connect(deletePatientBtn, &QPushButton::clicked, this, &MainWindow::onDeletePatientClicked);
-    
-    topLayout->addWidget(addPatientBtn);
-    topLayout->addWidget(editPatientBtn);
-    topLayout->addWidget(deletePatientBtn);
-    
-    mainLayout->addLayout(topLayout);
-    
-    // Patient table
-    patientTable = new QTableWidget();
-    patientTable->setColumnCount(7);
-    QStringList headers;
-    headers << "编号" << "姓名" << "电话" << "邮箱" << "出生日期" << "性别" << "病史";
-    patientTable->setHorizontalHeaderLabels(headers);
-    
-    patientTable->setStyleSheet(R"(
-        QTableWidget {
-            background-color: #FFFFFF;
-            color: #8B4513;
-            gridline-color: #D2B48C;
-            border: 1px solid #D2B48C;
-            border-radius: 6px;
-        }
-        QTableWidget::item {
-            padding: 8px;
-            border-bottom: 1px solid #D2B48C;
-        }
-        QTableWidget::item:selected {
-            background-color: #FF8C42;
-            color: #FFFFFF;
-        }
-        QHeaderView::section {
-            background-color: #E8D5C4;
-            color: #8B4513;
-            padding: 10px;
-            border: 1px solid #D2B48C;
-            font-weight: bold;
-        }
-    )");
-    
-    patientTable->setSelectionBehavior(QAbstractItemView::SelectRows);
-    patientTable->setAlternatingRowColors(true);
-    patientTable->horizontalHeader()->setStretchLastSection(true);
-    patientTable->verticalHeader()->setVisible(false);
-    
-    connect(patientTable, &QTableWidget::itemSelectionChanged, [this]() {
-        bool hasSelection = !patientTable->selectedItems().isEmpty();
-        editPatientBtn->setEnabled(hasSelection);
-        deletePatientBtn->setEnabled(hasSelection);
-    });
-    
-    connect(patientTable, &QTableWidget::cellDoubleClicked, 
-            this, &MainWindow::onPatientTableDoubleClicked);
-    
-    mainLayout->addWidget(patientTable);
-    
-    // Load initial data
-    refreshPatientTable();
+
+    // 根据配置决定使用 MVC 版本还是非 MVC 版本
+    if (mvcConfig.patients) {
+        // MVC：整个 patientsPage 只放一个 PatientWidget
+        QVBoxLayout *layout = new QVBoxLayout(patientsPage);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
+
+        PatientWidget *widget = new PatientWidget(patientsPage);
+        layout->addWidget(widget);
+
+        // 非 MVC 相关成员在 MVC 模式下不使用
+        patientTable = nullptr;
+        searchEdit = nullptr;
+        addPatientBtn = nullptr;
+        editPatientBtn = nullptr;
+        deletePatientBtn = nullptr;
+    } else {
+        // 非 MVC：保留原来的 QTableWidget 实现
+        QVBoxLayout *mainLayout = new QVBoxLayout(patientsPage);
+        mainLayout->setContentsMargins(20, 20, 20, 20);
+        mainLayout->setSpacing(15);
+
+        // 非 MVC 版本患者管理标题
+        QLabel *titleLabel = new QLabel("患者信息管理 (非 MVC 版本)");
+        titleLabel->setStyleSheet("font-size: 24px; font-weight: bold; color: #8B4513; margin-bottom: 10px;");
+        mainLayout->addWidget(titleLabel);
+
+        // Search and buttons layout
+        QHBoxLayout *topLayout = new QHBoxLayout();
+
+        // Search
+        QLabel *searchLabel = new QLabel("搜索:");
+        searchLabel->setStyleSheet("color: #8B4513; font-weight: bold;");
+        searchEdit = new QLineEdit();
+        searchEdit->setPlaceholderText("按姓名、电话或邮箱搜索...");
+        searchEdit->setStyleSheet(R"(
+            QLineEdit {
+                background-color: #FFFFFF;
+                border: 1px solid #D2B48C;
+                border-radius: 6px;
+                padding: 8px;
+                color: #8B4513;
+                font-size: 14px;
+            }
+            QLineEdit:focus {
+                border-color: #FF8C42;
+            }
+        )");
+
+        connect(searchEdit, &QLineEdit::textChanged, this, &MainWindow::onSearchPatients);
+
+        topLayout->addWidget(searchLabel);
+        topLayout->addWidget(searchEdit);
+        topLayout->addStretch();
+
+        // Buttons
+        addPatientBtn = new QPushButton("添加患者");
+        editPatientBtn = new QPushButton("编辑患者");
+        deletePatientBtn = new QPushButton("删除患者");
+
+        QString buttonStyle = R"(
+            QPushButton {
+                background-color: #FF8C42;
+                color: #FFFFFF;
+                border: none;
+                border-radius: 6px;
+                padding: 10px 20px;
+                font-weight: bold;
+                font-size: 14px;
+                min-width: 100px;
+            }
+            QPushButton:hover {
+                background-color: #FF9F5A;
+            }
+            QPushButton:pressed {
+                background-color: #E6793A;
+            }
+            QPushButton:disabled {
+                background-color: #D2B48C;
+                color: #CD853F;
+            }
+        )";
+
+        addPatientBtn->setStyleSheet(buttonStyle);
+        editPatientBtn->setStyleSheet(buttonStyle);
+        deletePatientBtn->setStyleSheet(buttonStyle);
+
+        editPatientBtn->setEnabled(false);
+        deletePatientBtn->setEnabled(false);
+
+        connect(addPatientBtn, &QPushButton::clicked, this, &MainWindow::onAddPatientClicked);
+        connect(editPatientBtn, &QPushButton::clicked, this, &MainWindow::onEditPatientClicked);
+        connect(deletePatientBtn, &QPushButton::clicked, this, &MainWindow::onDeletePatientClicked);
+
+        topLayout->addWidget(addPatientBtn);
+        topLayout->addWidget(editPatientBtn);
+        topLayout->addWidget(deletePatientBtn);
+
+        mainLayout->addLayout(topLayout);
+
+        // Patient table
+        patientTable = new QTableWidget();
+        patientTable->setColumnCount(7);
+        QStringList headers;
+        headers << "编号" << "姓名" << "电话" << "邮箱" << "出生日期" << "性别" << "病史";
+        patientTable->setHorizontalHeaderLabels(headers);
+
+        patientTable->setStyleSheet(R"(
+            QTableWidget {
+                background-color: #FFFFFF;
+                color: #8B4513;
+                gridline-color: #D2B48C;
+                border: 1px solid #D2B48C;
+                border-radius: 6px;
+            }
+            QTableWidget::item {
+                padding: 8px;
+                border-bottom: 1px solid #D2B48C;
+            }
+            QTableWidget::item:selected {
+                background-color: #FF8C42;
+                color: #FFFFFF;
+            }
+            QHeaderView::section {
+                background-color: #E8D5C4;
+                color: #8B4513;
+                padding: 10px;
+                border: 1px solid #D2B48C;
+                font-weight: bold;
+            }
+        )");
+
+        patientTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+        patientTable->setAlternatingRowColors(true);
+        patientTable->horizontalHeader()->setStretchLastSection(true);
+        patientTable->verticalHeader()->setVisible(false);
+
+        connect(patientTable, &QTableWidget::itemSelectionChanged, [this]() {
+            bool hasSelection = !patientTable->selectedItems().isEmpty();
+            editPatientBtn->setEnabled(hasSelection);
+            deletePatientBtn->setEnabled(hasSelection);
+        });
+
+        connect(patientTable, &QTableWidget::cellDoubleClicked,
+                this, &MainWindow::onPatientTableDoubleClicked);
+
+        mainLayout->addWidget(patientTable);
+
+        // Load initial data
+        refreshPatientTable();
+    }
 }
 
 void MainWindow::setupMedicalRecordsPage()
 {
-    // Create the medical record widget
-    medicalRecordWidget = new MedicalRecordWidget(this);
-    
-    // Add it to the stacked widget between patients and appointments
-    // Find the index of appointmentsPage
     int appointmentsIndex = ui->contentStackWidget->indexOf(ui->appointmentsPage);
-    
-    // Insert the medical records page before appointments
-    ui->contentStackWidget->insertWidget(appointmentsIndex, medicalRecordWidget);
-    
-    // Connect database signals to refresh medical records when patient data changes
-    connect(dbManager, &DatabaseManager::patientDataChanged,
-            medicalRecordWidget, &MedicalRecordWidget::refreshData);
-    connect(dbManager, &DatabaseManager::patientDeleted,
-            medicalRecordWidget, &MedicalRecordWidget::refreshData);
+
+    if (mvcConfig.medicalRecords) {
+        medicalRecordWidget = new MedicalRecordWidget(this);
+        medicalRecordsStackPage = medicalRecordWidget;
+        ui->contentStackWidget->insertWidget(appointmentsIndex, medicalRecordsStackPage);
+        connect(dbManager, &DatabaseManager::patientDataChanged,
+                medicalRecordWidget, &MedicalRecordWidget::refreshData);
+        connect(dbManager, &DatabaseManager::patientDeleted,
+                medicalRecordWidget, &MedicalRecordWidget::refreshData);
+    } else {
+        QWidget *container = new QWidget(this);
+        container->setStyleSheet("background-color: #F5E6D3;");
+        QVBoxLayout *mainLayout = new QVBoxLayout(container);
+        mainLayout->setContentsMargins(20, 20, 20, 20);
+        mainLayout->setSpacing(15);
+
+        // 非 MVC 版本病历管理标题
+        QLabel *titleLabel = new QLabel("病历管理 (非 MVC 版本)");
+        titleLabel->setStyleSheet("font-size: 24px; font-weight: bold; color: #8B4513; margin-bottom: 10px;");
+        mainLayout->addWidget(titleLabel);
+
+        QHBoxLayout *topLayout = new QHBoxLayout();
+        QLabel *searchLabel = new QLabel("搜索:");
+        searchLabel->setStyleSheet("color: #8B4513; font-weight: bold;");
+        medicalRecordSearchEdit = new QLineEdit();
+        medicalRecordSearchEdit->setPlaceholderText("按患者姓名、诊断或医生搜索...");
+        medicalRecordSearchEdit->setStyleSheet(R"(
+            QLineEdit {
+                background-color: #FFFFFF;
+                border: 1px solid #D2B48C;
+                border-radius: 6px;
+                padding: 8px;
+                color: #8B4513;
+                font-size: 14px;
+            }
+            QLineEdit:focus { border-color: #FF8C42; }
+        )");
+        connect(medicalRecordSearchEdit, &QLineEdit::textChanged, this, &MainWindow::onSearchMedicalRecords);
+
+        topLayout->addWidget(searchLabel);
+        topLayout->addWidget(medicalRecordSearchEdit);
+        topLayout->addStretch();
+
+        QString buttonStyle = R"(
+            QPushButton {
+                background-color: #FF8C42;
+                color: #FFFFFF;
+                border: none;
+                border-radius: 6px;
+                padding: 10px 20px;
+                font-weight: bold;
+                font-size: 14px;
+                min-width: 100px;
+            }
+            QPushButton:hover { background-color: #FF9F5A; }
+            QPushButton:pressed { background-color: #E6793A; }
+            QPushButton:disabled { background-color: #D2B48C; color: #CD853F; }
+        )";
+
+        addRecordBtn = new QPushButton("添加病历");
+        editRecordBtn = new QPushButton("编辑病历");
+        deleteRecordBtn = new QPushButton("删除病历");
+        addRecordBtn->setStyleSheet(buttonStyle);
+        editRecordBtn->setStyleSheet(buttonStyle);
+        deleteRecordBtn->setStyleSheet(buttonStyle);
+        editRecordBtn->setEnabled(false);
+        deleteRecordBtn->setEnabled(false);
+
+        connect(addRecordBtn, &QPushButton::clicked, this, &MainWindow::onAddRecordClicked);
+        connect(editRecordBtn, &QPushButton::clicked, this, &MainWindow::onEditRecordClicked);
+        connect(deleteRecordBtn, &QPushButton::clicked, this, &MainWindow::onDeleteRecordClicked);
+
+        topLayout->addWidget(addRecordBtn);
+        topLayout->addWidget(editRecordBtn);
+        topLayout->addWidget(deleteRecordBtn);
+        mainLayout->addLayout(topLayout);
+
+        medicalRecordTable = new QTableWidget();
+        medicalRecordTable->setColumnCount(5);
+        medicalRecordTable->setHorizontalHeaderLabels(
+            QStringList() << "病历ID" << "患者姓名" << "创建日期" << "诊断" << "医生");
+        medicalRecordTable->setStyleSheet(R"(
+            QTableWidget {
+                background-color: #FFFFFF;
+                color: #8B4513;
+                gridline-color: #D2B48C;
+                border: 1px solid #D2B48C;
+                border-radius: 6px;
+            }
+            QTableWidget::item { padding: 8px; border-bottom: 1px solid #D2B48C; }
+            QTableWidget::item:selected { background-color: #FF8C42; color: #FFFFFF; }
+            QHeaderView::section {
+                background-color: #E8D5C4;
+                color: #8B4513;
+                padding: 10px;
+                border: 1px solid #D2B48C;
+                font-weight: bold;
+            }
+        )");
+        medicalRecordTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+        medicalRecordTable->setAlternatingRowColors(true);
+        medicalRecordTable->horizontalHeader()->setStretchLastSection(true);
+        medicalRecordTable->verticalHeader()->setVisible(false);
+
+        connect(medicalRecordTable, &QTableWidget::itemSelectionChanged, [this]() {
+            bool hasSelection = medicalRecordTable && !medicalRecordTable->selectedItems().isEmpty();
+            if (editRecordBtn) editRecordBtn->setEnabled(hasSelection);
+            if (deleteRecordBtn) deleteRecordBtn->setEnabled(hasSelection);
+        });
+        connect(medicalRecordTable, &QTableWidget::cellDoubleClicked, [this](int row, int) {
+            Q_UNUSED(row)
+            onEditRecordClicked();
+        });
+
+        mainLayout->addWidget(medicalRecordTable);
+
+        medicalRecordsStackPage = container;
+        ui->contentStackWidget->insertWidget(appointmentsIndex, medicalRecordsStackPage);
+
+        connect(dbManager, &DatabaseManager::patientDataChanged,
+                this, [this]() { refreshMedicalRecordTable(); });
+        connect(dbManager, &DatabaseManager::patientDeleted,
+                this, [this]() { refreshMedicalRecordTable(); });
+        connect(dbManager, &DatabaseManager::medicalRecordDataChanged,
+                this, [this]() { refreshMedicalRecordTable(); });
+
+        refreshMedicalRecordTable();
+    }
 }
 
 void MainWindow::refreshPatientTable()
@@ -431,6 +640,103 @@ void MainWindow::onPatientTableDoubleClicked(int row, int column)
     
     if (row >= 0) {
         onEditPatientClicked();
+    }
+}
+
+void MainWindow::populateMedicalRecordTable(const QList<MedicalRecord> &records)
+{
+    if (!medicalRecordTable) return;
+    medicalRecordTable->setRowCount(records.size());
+    for (int i = 0; i < records.size(); ++i) {
+        const MedicalRecord &r = records[i];
+        medicalRecordTable->setItem(i, 0, new QTableWidgetItem(QString::number(r.id)));
+        medicalRecordTable->setItem(i, 1, new QTableWidgetItem(r.patientName));
+        medicalRecordTable->setItem(i, 2, new QTableWidgetItem(r.createdDate.toString("yyyy-MM-dd hh:mm")));
+        QString diag = r.diagnosis;
+        if (diag.length() > 50) diag = diag.left(47) + "...";
+        medicalRecordTable->setItem(i, 3, new QTableWidgetItem(diag));
+        medicalRecordTable->setItem(i, 4, new QTableWidgetItem(r.doctorName));
+    }
+    medicalRecordTable->resizeColumnsToContents();
+}
+
+void MainWindow::refreshMedicalRecordTable()
+{
+    if (!dbManager->isConnected() || !medicalRecordTable) return;
+    QList<MedicalRecord> records = dbManager->getAllMedicalRecords();
+    populateMedicalRecordTable(records);
+}
+
+void MainWindow::onSearchMedicalRecords()
+{
+    if (!dbManager->isConnected() || !medicalRecordTable) return;
+    QString term = medicalRecordSearchEdit ? medicalRecordSearchEdit->text().trimmed() : QString();
+    QList<MedicalRecord> records = term.isEmpty()
+        ? dbManager->getAllMedicalRecords()
+        : dbManager->searchMedicalRecords(term);
+    populateMedicalRecordTable(records);
+}
+
+void MainWindow::onAddRecordClicked()
+{
+    MedicalRecordDialog dialog(MedicalRecordDialog::Create, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        MedicalRecord record = dialog.getMedicalRecord();
+        if (dbManager->isConnected() && dbManager->addMedicalRecord(record)) {
+            QMessageBox::information(this, "成功", "病历添加成功！");
+            refreshMedicalRecordTable();
+        } else {
+            QMessageBox::critical(this, "错误", "添加病历失败。");
+        }
+    }
+}
+
+void MainWindow::onEditRecordClicked()
+{
+    if (!medicalRecordTable) return;
+    int row = medicalRecordTable->currentRow();
+    if (row < 0) {
+        QMessageBox::warning(this, "编辑病历", "请先选择一条病历记录");
+        return;
+    }
+    int recordId = medicalRecordTable->item(row, 0)->text().toInt();
+    MedicalRecord record = dbManager->getMedicalRecordById(recordId);
+    if (record.id <= 0) {
+        QMessageBox::warning(this, "编辑病历", "无法获取病历信息");
+        return;
+    }
+    MedicalRecordDialog dialog(MedicalRecordDialog::Edit, this);
+    dialog.setMedicalRecord(record);
+    if (dialog.exec() == QDialog::Accepted) {
+        MedicalRecord updated = dialog.getMedicalRecord();
+        if (dbManager->updateMedicalRecord(updated)) {
+            QMessageBox::information(this, "成功", "病历更新成功！");
+            refreshMedicalRecordTable();
+        } else {
+            QMessageBox::critical(this, "错误", "更新病历失败。");
+        }
+    }
+}
+
+void MainWindow::onDeleteRecordClicked()
+{
+    if (!medicalRecordTable) return;
+    int row = medicalRecordTable->currentRow();
+    if (row < 0) {
+        QMessageBox::warning(this, "删除病历", "请先选择一条病历记录");
+        return;
+    }
+    int recordId = medicalRecordTable->item(row, 0)->text().toInt();
+    QString info = medicalRecordTable->item(row, 3)->text();
+    if (QMessageBox::question(this, "确认删除",
+            QString("确定要删除该病历记录吗？\n诊断：%1").arg(info),
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+        return;
+    if (dbManager->deleteMedicalRecord(recordId)) {
+        QMessageBox::information(this, "成功", "病历删除成功！");
+        refreshMedicalRecordTable();
+    } else {
+        QMessageBox::critical(this, "错误", "删除病历失败。");
     }
 }
 
@@ -770,7 +1076,7 @@ void MainWindow::on_appointmentsButton_clicked()
 
 void MainWindow::on_medicalRecordsButton_clicked()
 {
-    ui->contentStackWidget->setCurrentWidget(medicalRecordWidget);
+    ui->contentStackWidget->setCurrentWidget(medicalRecordsStackPage);
 }
 
 bool MainWindow::createDatabaseIfNotExists(const QString &host, const QString &username, const QString &password)
