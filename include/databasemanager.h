@@ -76,6 +76,9 @@ public:
     QList<Patient> getAllPatients();
     QList<Patient> searchPatients(const QString &searchTerm);
     Patient getPatientById(int id);
+    // 分页查询接口
+    QList<Patient> getPatientsByPage(int page, int pageSize);
+    QList<Patient> searchPatientsByPage(const QString &searchTerm, int page, int pageSize);
 
     // Medical record management
     bool addMedicalRecord(const MedicalRecord &record);
@@ -85,6 +88,9 @@ public:
     QList<MedicalRecord> getMedicalRecordsByPatient(int patientId);
     QList<MedicalRecord> searchMedicalRecords(const QString &searchTerm);
     MedicalRecord getMedicalRecordById(int id);
+    // 分页查询接口
+    QList<MedicalRecord> getMedicalRecordsByPage(int page, int pageSize);
+    QList<MedicalRecord> searchMedicalRecordsByPage(const QString &filter, int page, int pageSize);
 
     // Statistics for dashboard
     int getTotalPatients();

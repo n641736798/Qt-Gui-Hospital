@@ -7,7 +7,12 @@
 #include <QMessageBox>
 
 MedicalRecordModel::MedicalRecordModel(QObject *parent, QSqlDatabase db)
-    : QSqlTableModel(parent, db), m_database(db)
+    : QAbstractTableModel(parent)
+    , m_database(db)
+    , m_dbManager(&DatabaseManager::instance())
+    , m_currentPage(0)
+    , m_hasMore(true)
+    , m_totalCount(0)
 {
     if (!m_database.isValid()) {
         m_database = QSqlDatabase::database();
@@ -16,79 +21,95 @@ MedicalRecordModel::MedicalRecordModel(QObject *parent, QSqlDatabase db)
     setupModel();
 }
 
+int MedicalRecordModel::rowCount(const QModelIndex &parent) const
+{
+    if (parent.isValid())
+        return 0;
+    return m_records.size();
+}
+
+bool MedicalRecordModel::canFetchMore(const QModelIndex &parent) const
+{
+    if (parent.isValid())
+        return false;
+    return m_hasMore;
+}
+
+void MedicalRecordModel::fetchMore(const QModelIndex &parent)
+{
+    if (parent.isValid() || !m_hasMore)
+        return;
+
+    QList<MedicalRecord> newRecords = m_dbManager->getMedicalRecordsByPage(m_currentPage, PAGE_SIZE);
+
+    if (newRecords.isEmpty()) {
+        m_hasMore = false;
+        return;
+    }
+
+    beginInsertRows(QModelIndex(), m_records.size(), m_records.size() + newRecords.size() - 1);
+    m_records.append(newRecords);
+    endInsertRows();
+
+    m_currentPage++;
+    if (newRecords.size() < PAGE_SIZE) {
+        m_hasMore = false;
+    }
+}
+
 void MedicalRecordModel::setupModel()
 {
-    // Set the table name
-    setTable("medical_records");
-    
-    // Set edit strategy to manual submit for better control
-    setEditStrategy(QSqlTableModel::OnManualSubmit);
-    
-    // Set up the query to join with patients table for patient names
-    QString queryStr = R"(
-        SELECT 
-            mr.id,
-            mr.patient_id,
-            COALESCE(p.name, '患者已删除') as patient_name,
-            mr.created_date,
-            mr.diagnosis,
-            mr.symptoms,
-            mr.treatment,
-            mr.doctor_name,
-            mr.notes
-        FROM medical_records mr
-        LEFT JOIN patients p ON mr.patient_id = p.id
-        ORDER BY mr.created_date DESC
-    )";
-    
-    setQuery(queryStr, m_database);
-    
-    // Set headers
-    setHeaderData(Id, Qt::Horizontal, "病历ID");
-    setHeaderData(PatientId, Qt::Horizontal, "患者ID");
-    setHeaderData(PatientName, Qt::Horizontal, "患者姓名");
-    setHeaderData(CreatedDate, Qt::Horizontal, "创建日期");
-    setHeaderData(Diagnosis, Qt::Horizontal, "诊断");
-    setHeaderData(Symptoms, Qt::Horizontal, "症状");
-    setHeaderData(Treatment, Qt::Horizontal, "治疗方案");
-    setHeaderData(DoctorName, Qt::Horizontal, "医生");
-    setHeaderData(Notes, Qt::Horizontal, "备注");
+    refreshData();
 }
 
 QVariant MedicalRecordModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= m_records.size()) {
         return QVariant();
     }
 
+    const MedicalRecord &record = m_records.at(index.row());
+
     if (role == Qt::DisplayRole) {
-        // Handle special formatting for certain columns
         switch (index.column()) {
-        case CreatedDate: {
-            QDateTime dateTime = QSqlTableModel::data(index, role).toDateTime();
-            return dateTime.toString("yyyy-MM-dd hh:mm");
-        }
-        case PatientName: {
-            // Patient name is already handled by the JOIN query
-            return QSqlTableModel::data(index, role);
-        }
-        case Diagnosis:
-        case Symptoms:
-        case Treatment:
-        case Notes: {
-            // Truncate long text for display
-            QString text = QSqlTableModel::data(index, role).toString();
+        case Id: return record.id;
+        case PatientId: return record.patientId;
+        case PatientName: return record.patientName;
+        case CreatedDate: return record.createdDate.toString("yyyy-MM-dd hh:mm");
+        case Diagnosis: {
+            QString text = record.diagnosis;
             if (text.length() > 50) {
                 return text.left(47) + "...";
             }
             return text;
         }
-        default:
-            return QSqlTableModel::data(index, role);
+        case Symptoms: {
+            QString text = record.symptoms;
+            if (text.length() > 50) {
+                return text.left(47) + "...";
+            }
+            return text;
+        }
+        case Treatment: {
+            QString text = record.treatment;
+            if (text.length() > 50) {
+                return text.left(47) + "...";
+            }
+            return text;
+        }
+        case DoctorName: return record.doctorName;
+        case Notes: {
+            QString text = record.notes;
+            if (text.length() > 50) {
+                return text.left(47) + "...";
+            }
+            return text;
+        }
+        default: break;
         }
     }
-    
-    return QSqlTableModel::data(index, role);
+
+    return QVariant();
 }
 
 QVariant MedicalRecordModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -108,7 +129,7 @@ QVariant MedicalRecordModel::headerData(int section, Qt::Orientation orientation
         }
     }
     
-    return QSqlTableModel::headerData(section, orientation, role);
+    return QAbstractTableModel::headerData(section, orientation, role);
 }
 
 int MedicalRecordModel::columnCount(const QModelIndex &parent) const
@@ -163,124 +184,34 @@ bool MedicalRecordModel::deleteMedicalRecord(int id)
     return dbManager.deleteMedicalRecord(id);
 }
 
-MedicalRecord MedicalRecordModel::getMedicalRecord(int row) const
-{
-    MedicalRecord record;
-    
-    if (row < 0 || row >= rowCount()) {
-        return record;
-    }
-
-    QSqlRecord sqlRecord = this->record(row);
-    
-    record.id = sqlRecord.value("id").toInt();
-    record.patientId = sqlRecord.value("patient_id").toInt();
-    record.patientName = sqlRecord.value("patient_name").toString();
-    record.createdDate = sqlRecord.value("created_date").toDateTime();
-    record.diagnosis = sqlRecord.value("diagnosis").toString();
-    record.symptoms = sqlRecord.value("symptoms").toString();
-    record.treatment = sqlRecord.value("treatment").toString();
-    record.doctorName = sqlRecord.value("doctor_name").toString();
-    record.notes = sqlRecord.value("notes").toString();
-    
-    return record;
-}
-
 void MedicalRecordModel::refreshData()
 {
-    // Clear the patient name cache
-    m_patientNameCache.clear();
-    
-    // Refresh the model data
-    QString queryStr = R"(
-        SELECT 
-            mr.id,
-            mr.patient_id,
-            COALESCE(p.name, '患者已删除') as patient_name,
-            mr.created_date,
-            mr.diagnosis,
-            mr.symptoms,
-            mr.treatment,
-            mr.doctor_name,
-            mr.notes
-        FROM medical_records mr
-        LEFT JOIN patients p ON mr.patient_id = p.id
-        ORDER BY mr.created_date DESC
-    )";
-    
-    setQuery(queryStr, m_database);
+    // 重置分页参数
+    m_currentPage = 0;
+    m_hasMore = true;
+    m_totalCount = m_dbManager->getTotalMedicalRecords();
+
+    beginResetModel();
+    m_records.clear();
+    endResetModel();
+
+    // 加载第一页
+    fetchMore(QModelIndex());
 }
 
-void MedicalRecordModel::setFilter(const QString &filter)
-{
-    QString queryStr;
-    
-    if (filter.isEmpty()) {
-        queryStr = R"(
-            SELECT 
-                mr.id,
-                mr.patient_id,
-                COALESCE(p.name, '患者已删除') as patient_name,
-                mr.created_date,
-                mr.diagnosis,
-                mr.symptoms,
-                mr.treatment,
-                mr.doctor_name,
-                mr.notes
-            FROM medical_records mr
-            LEFT JOIN patients p ON mr.patient_id = p.id
-            ORDER BY mr.created_date DESC
-        )";
-    } else {
-        queryStr = QString(R"(
-            SELECT 
-                mr.id,
-                mr.patient_id,
-                COALESCE(p.name, '患者已删除') as patient_name,
-                mr.created_date,
-                mr.diagnosis,
-                mr.symptoms,
-                mr.treatment,
-                mr.doctor_name,
-                mr.notes
-            FROM medical_records mr
-            LEFT JOIN patients p ON mr.patient_id = p.id
-            WHERE p.name LIKE '%%1%' 
-               OR mr.diagnosis LIKE '%%1%' 
-               OR mr.doctor_name LIKE '%%1%'
-            ORDER BY mr.created_date DESC
-        )").arg(filter);
-    }
-    
-    setQuery(queryStr, m_database);
-}
+
 
 void MedicalRecordModel::refresh()
 {
     refreshData();
 }
 
-QString MedicalRecordModel::getPatientNameById(int patientId) const
+MedicalRecord MedicalRecordModel::getMedicalRecord(int row) const
 {
-    // Check cache first
-    if (m_patientNameCache.contains(patientId)) {
-        return m_patientNameCache[patientId];
+    if (row < 0 || row >= m_records.size()) {
+        return MedicalRecord();
     }
-    
-    // Query database
-    QSqlQuery query(m_database);
-    query.prepare("SELECT name FROM patients WHERE id = ?");
-    query.addBindValue(patientId);
-    
-    QString patientName = "患者已删除";
-    if (query.exec() && query.next()) {
-        patientName = query.value(0).toString();
-    }
-    
-    // Cache the result
-    m_patientNameCache[patientId] = patientName;
-    
-    return patientName;
+    return m_records.at(row);
 }
 
 bool MedicalRecordModel::validateMedicalRecord(const MedicalRecord &record) const

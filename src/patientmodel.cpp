@@ -3,6 +3,9 @@
 PatientModel::PatientModel(QObject *parent)
     : QAbstractTableModel(parent)
     , m_dbManager(&DatabaseManager::instance())
+    , m_currentPage(0)
+    , m_hasMore(true)
+    , m_totalCount(0)
 {
     refresh();
 }
@@ -75,6 +78,41 @@ QVariant PatientModel::headerData(int section, Qt::Orientation orientation, int 
     return QAbstractTableModel::headerData(section, orientation, role);
 }
 
+bool PatientModel::canFetchMore(const QModelIndex &parent) const
+{
+    if (parent.isValid())
+        return false;
+    return m_hasMore;
+}
+
+void PatientModel::fetchMore(const QModelIndex &parent)
+{
+    if (parent.isValid() || !m_hasMore)
+        return;
+
+    QList<Patient> newPatients;
+    if (m_currentSearchTerm.isEmpty()) {
+        newPatients = m_dbManager->getPatientsByPage(m_currentPage, PAGE_SIZE);
+    } else {
+        newPatients = m_dbManager->searchPatientsByPage(m_currentSearchTerm, m_currentPage, PAGE_SIZE);
+    }
+
+    if (newPatients.isEmpty()) {
+        m_hasMore = false;
+        return;
+    }
+
+    beginInsertRows(QModelIndex(), m_patients.size(), m_patients.size() + newPatients.size() - 1);
+    m_patients.append(newPatients);
+    endInsertRows();
+
+    m_currentPage++;
+    // 如果返回的数据小于分页大小，说明没有更多了
+    if (newPatients.size() < PAGE_SIZE) {
+        m_hasMore = false;
+    }
+}
+
 void PatientModel::refresh(const QString &searchTerm)
 {
     if (!m_dbManager || !m_dbManager->isConnected()) {
@@ -84,16 +122,18 @@ void PatientModel::refresh(const QString &searchTerm)
         return;
     }
 
-    QList<Patient> patients;
-    if (searchTerm.trimmed().isEmpty()) {
-        patients = m_dbManager->getAllPatients();
-    } else {
-        patients = m_dbManager->searchPatients(searchTerm.trimmed());
-    }
+    // 重置分页参数
+    m_currentSearchTerm = searchTerm.trimmed();
+    m_currentPage = 0;
+    m_hasMore = true;
+    m_totalCount = m_dbManager->getTotalPatients();
 
     beginResetModel();
-    m_patients = patients;
+    m_patients.clear();
     endResetModel();
+
+    // 加载第一页
+    fetchMore(QModelIndex());
 }
 
 Patient PatientModel::getPatient(int row) const

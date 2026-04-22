@@ -481,6 +481,70 @@ Patient DatabaseManager::getPatientById(int id)
     return patient;
 }
 
+QList<Patient> DatabaseManager::getPatientsByPage(int page, int pageSize)
+{
+    QList<Patient> patients;
+    QSqlQuery query;
+    query.prepare("SELECT id, name, phone, email, address, birth_date, gender, medical_history "
+                  "FROM patients "
+                  "ORDER BY id "
+                  "LIMIT ? OFFSET ?");
+    query.addBindValue(pageSize);
+    query.addBindValue(page * pageSize);
+
+    if (query.exec()) {
+        while (query.next()) {
+            Patient patient;
+            patient.id = query.value(0).toInt();
+            patient.name = query.value(1).toString();
+            patient.phone = query.value(2).toString();
+            patient.email = query.value(3).toString();
+            patient.address = query.value(4).toString();
+            patient.birthDate = query.value(5).toString();
+            patient.gender = query.value(6).toString();
+            patient.medicalHistory = query.value(7).toString();
+            patients.append(patient);
+        }
+    }
+
+    return patients;
+}
+
+QList<Patient> DatabaseManager::searchPatientsByPage(const QString &searchTerm, int page, int pageSize)
+{
+    QList<Patient> patients;
+    QSqlQuery query;
+    query.prepare("SELECT id, name, phone, email, address, birth_date, gender, medical_history "
+                  "FROM patients "
+                  "WHERE name LIKE ? OR phone LIKE ? OR email LIKE ? "
+                  "ORDER BY id "
+                  "LIMIT ? OFFSET ?");
+    
+    QString searchPattern = "%" + searchTerm + "%";
+    query.addBindValue(searchPattern);
+    query.addBindValue(searchPattern);
+    query.addBindValue(searchPattern);
+    query.addBindValue(pageSize);
+    query.addBindValue(page * pageSize);
+
+    if (query.exec()) {
+        while (query.next()) {
+            Patient patient;
+            patient.id = query.value(0).toInt();
+            patient.name = query.value(1).toString();
+            patient.phone = query.value(2).toString();
+            patient.email = query.value(3).toString();
+            patient.address = query.value(4).toString();
+            patient.birthDate = query.value(5).toString();
+            patient.gender = query.value(6).toString();
+            patient.medicalHistory = query.value(7).toString();
+            patients.append(patient);
+        }
+    }
+
+    return patients;
+}
+
 int DatabaseManager::getTotalPatients()
 {
     QSqlQuery query("SELECT COUNT(*) FROM patients");
@@ -803,6 +867,84 @@ MedicalRecord DatabaseManager::getMedicalRecordById(int id)
     }
 
     return record;
+}
+
+QList<MedicalRecord> DatabaseManager::getMedicalRecordsByPage(int page, int pageSize)
+{
+    QList<MedicalRecord> records;
+    QSqlQuery query(R"(
+        SELECT mr.id, mr.patient_id, p.name, mr.created_date, mr.diagnosis, 
+               mr.symptoms, mr.treatment, mr.doctor_name, mr.notes
+        FROM medical_records mr
+        LEFT JOIN patients p ON mr.patient_id = p.id
+        ORDER BY mr.created_date DESC
+        LIMIT ? OFFSET ?
+    )");
+    query.addBindValue(pageSize);
+    query.addBindValue(page * pageSize);
+
+    if (query.exec()) {
+        while (query.next()) {
+            MedicalRecord record;
+            record.id = query.value(0).toInt();
+            record.patientId = query.value(1).toInt();
+            record.patientName = query.value(2).toString();
+            if (record.patientName.isEmpty()) {
+                record.patientName = "患者已删除";
+            }
+            record.createdDate = query.value(3).toDateTime();
+            record.diagnosis = query.value(4).toString();
+            record.symptoms = query.value(5).toString();
+            record.treatment = query.value(6).toString();
+            record.doctorName = query.value(7).toString();
+            record.notes = query.value(8).toString();
+            records.append(record);
+        }
+    }
+
+    return records;
+}
+
+QList<MedicalRecord> DatabaseManager::searchMedicalRecordsByPage(const QString &filter, int page, int pageSize)
+{
+    QList<MedicalRecord> records;
+    QSqlQuery query(R"(
+        SELECT mr.id, mr.patient_id, p.name, mr.created_date, mr.diagnosis, 
+               mr.symptoms, mr.treatment, mr.doctor_name, mr.notes
+        FROM medical_records mr
+        LEFT JOIN patients p ON mr.patient_id = p.id
+        WHERE p.name LIKE ? OR mr.diagnosis LIKE ? OR mr.doctor_name LIKE ?
+        ORDER BY mr.created_date DESC
+        LIMIT ? OFFSET ?
+    )");
+    
+    QString filterPattern = "%" + filter + "%";
+    query.addBindValue(filterPattern);
+    query.addBindValue(filterPattern);
+    query.addBindValue(filterPattern);
+    query.addBindValue(pageSize);
+    query.addBindValue(page * pageSize);
+
+    if (query.exec()) {
+        while (query.next()) {
+            MedicalRecord record;
+            record.id = query.value(0).toInt();
+            record.patientId = query.value(1).toInt();
+            record.patientName = query.value(2).toString();
+            if (record.patientName.isEmpty()) {
+                record.patientName = "患者已删除";
+            }
+            record.createdDate = query.value(3).toDateTime();
+            record.diagnosis = query.value(4).toString();
+            record.symptoms = query.value(5).toString();
+            record.treatment = query.value(6).toString();
+            record.doctorName = query.value(7).toString();
+            record.notes = query.value(8).toString();
+            records.append(record);
+        }
+    }
+
+    return records;
 }
 
 QMap<QString, int> DatabaseManager::getPatientsByMonth()

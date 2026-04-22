@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'medicalrecordwidget.ui'
 **
-** Created by: Qt User Interface Compiler version 5.15.2
+** Created by: Qt User Interface Compiler version 6.10.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -40,47 +40,47 @@ public:
     void setupUi(QWidget *MedicalRecordWidget)
     {
         if (MedicalRecordWidget->objectName().isEmpty())
-            MedicalRecordWidget->setObjectName(QString::fromUtf8("MedicalRecordWidget"));
+            MedicalRecordWidget->setObjectName("MedicalRecordWidget");
         MedicalRecordWidget->resize(800, 600);
         verticalLayout = new QVBoxLayout(MedicalRecordWidget);
         verticalLayout->setSpacing(8);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setObjectName("verticalLayout");
         verticalLayout->setContentsMargins(12, 12, 12, 12);
         pageTitle = new QLabel(MedicalRecordWidget);
-        pageTitle->setObjectName(QString::fromUtf8("pageTitle"));
+        pageTitle->setObjectName("pageTitle");
         pageTitle->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
 
         verticalLayout->addWidget(pageTitle);
 
         toolbarLayout = new QHBoxLayout();
         toolbarLayout->setSpacing(8);
-        toolbarLayout->setObjectName(QString::fromUtf8("toolbarLayout"));
+        toolbarLayout->setObjectName("toolbarLayout");
         addButton = new QPushButton(MedicalRecordWidget);
-        addButton->setObjectName(QString::fromUtf8("addButton"));
+        addButton->setObjectName("addButton");
         addButton->setMinimumSize(QSize(100, 32));
 
         toolbarLayout->addWidget(addButton);
 
         editButton = new QPushButton(MedicalRecordWidget);
-        editButton->setObjectName(QString::fromUtf8("editButton"));
+        editButton->setObjectName("editButton");
         editButton->setEnabled(false);
         editButton->setMinimumSize(QSize(80, 32));
 
         toolbarLayout->addWidget(editButton);
 
         deleteButton = new QPushButton(MedicalRecordWidget);
-        deleteButton->setObjectName(QString::fromUtf8("deleteButton"));
+        deleteButton->setObjectName("deleteButton");
         deleteButton->setEnabled(false);
         deleteButton->setMinimumSize(QSize(80, 32));
 
         toolbarLayout->addWidget(deleteButton);
 
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Minimum);
 
         toolbarLayout->addItem(horizontalSpacer);
 
         searchEdit = new QLineEdit(MedicalRecordWidget);
-        searchEdit->setObjectName(QString::fromUtf8("searchEdit"));
+        searchEdit->setObjectName("searchEdit");
         searchEdit->setMinimumSize(QSize(250, 32));
 
         toolbarLayout->addWidget(searchEdit);
@@ -89,7 +89,7 @@ public:
         verticalLayout->addLayout(toolbarLayout);
 
         tableView = new QTableView(MedicalRecordWidget);
-        tableView->setObjectName(QString::fromUtf8("tableView"));
+        tableView->setObjectName("tableView");
         tableView->setAlternatingRowColors(true);
         tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
         tableView->setSortingEnabled(true);
@@ -98,7 +98,7 @@ public:
         verticalLayout->addWidget(tableView);
 
         messageLabel = new QLabel(MedicalRecordWidget);
-        messageLabel->setObjectName(QString::fromUtf8("messageLabel"));
+        messageLabel->setObjectName("messageLabel");
         messageLabel->setAlignment(Qt::AlignmentFlag::AlignCenter);
         messageLabel->setVisible(false);
 
@@ -112,8 +112,8 @@ public:
 
     void retranslateUi(QWidget *MedicalRecordWidget)
     {
-        MedicalRecordWidget->setWindowTitle(QCoreApplication::translate("MedicalRecordWidget", "\347\227\205\345\216\206\347\256\241\347\220\206", nullptr));
-        pageTitle->setText(QCoreApplication::translate("MedicalRecordWidget", "\347\227\205\345\216\206\344\277\241\346\201\257\347\256\241\347\220\206", nullptr));
+        MedicalRecordWidget->setWindowTitle(QCoreApplication::translate("MedicalRecordWidget", "\347\227\205\345\216\206\347\256\241\347\220\206 (MVC \347\211\210\346\234\254)", nullptr));
+        pageTitle->setText(QCoreApplication::translate("MedicalRecordWidget", "\347\227\205\345\216\206\344\277\241\346\201\257\347\256\241\347\220\206 (MVC \347\211\210\346\234\254)", nullptr));
         addButton->setText(QCoreApplication::translate("MedicalRecordWidget", "\346\267\273\345\212\240\347\227\205\345\216\206", nullptr));
         editButton->setText(QCoreApplication::translate("MedicalRecordWidget", "\347\274\226\350\276\221", nullptr));
         deleteButton->setText(QCoreApplication::translate("MedicalRecordWidget", "\345\210\240\351\231\244", nullptr));
