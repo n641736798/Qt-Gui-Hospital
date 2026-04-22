@@ -27,9 +27,14 @@ void MedicalRecordWidget::setupUI()
     // Create and setup the medical record model
     m_model = new MedicalRecordModel(this);
     
-    // Since MedicalRecordModel uses custom queries, we'll use it directly
-    // instead of a proxy model for better control over filtering
-    ui->tableView->setModel(m_model);
+    // 创建排序过滤代理模型
+    m_proxyModel = new QSortFilterProxyModel(this);
+    m_proxyModel->setSourceModel(m_model);
+    m_proxyModel->setFilterKeyColumn(-1); // 搜索所有列
+    m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+    
+    ui->tableView->setModel(m_proxyModel);
     
     // Configure table view
     ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -88,7 +93,7 @@ void MedicalRecordWidget::refreshData()
         updateButtonStates();
         
         // Show message if no records found
-        if (m_model->rowCount() == 0) {
+        if (m_proxyModel->rowCount() == 0) {
             showMessage("暂无病历记录");
         } else {
             hideMessage();
@@ -128,8 +133,9 @@ void MedicalRecordWidget::onEditRecord()
         return;
     }
     
-    // Get the selected row
-    int row = selectedIndexes.first().row();
+    // Get the selected row (转换代理索引到源模型索引)
+    QModelIndex sourceIndex = m_proxyModel->mapToSource(selectedIndexes.first());
+    int row = sourceIndex.row();
     MedicalRecord record = m_model->getMedicalRecord(row);
     
     if (record.id <= 0) {
@@ -168,8 +174,9 @@ void MedicalRecordWidget::onDeleteRecord()
         return;
     }
     
-    // Get the selected row
-    int row = selectedIndexes.first().row();
+    // Get the selected row (转换代理索引到源模型索引)
+    QModelIndex sourceIndex = m_proxyModel->mapToSource(selectedIndexes.first());
+    int row = sourceIndex.row();
     MedicalRecord record = m_model->getMedicalRecord(row);
     
     if (record.id <= 0) {
@@ -217,12 +224,12 @@ void MedicalRecordWidget::onDeleteRecord()
 
 void MedicalRecordWidget::onSearchChanged(const QString &text)
 {
-    if (m_model) {
-        // Use the model's built-in filtering capability
-        m_model->setFilter(text);
+    if (m_proxyModel) {
+        // 使用代理模型进行过滤
+        m_proxyModel->setFilterFixedString(text);
         
         // Show message if no search results found
-        if (m_model->rowCount() == 0 && !text.isEmpty()) {
+        if (m_proxyModel->rowCount() == 0 && !text.isEmpty()) {
             showMessage("未找到匹配的病历记录");
         } else {
             hideMessage();
@@ -269,22 +276,17 @@ void MedicalRecordWidget::onMedicalRecordDataChanged()
     // Automatically refresh the UI when medical record data changes
     // This is triggered by DatabaseManager signals after CRUD operations
     if (m_model) {
-        // Store current search filter to reapply after refresh
+        // 获取当前搜索过滤词
         QString currentFilter = ui->searchEdit->text();
         
         // Refresh the model data
         m_model->refreshData();
         
-        // Reapply search filter if there was one
-        if (!currentFilter.isEmpty()) {
-            m_model->setFilter(currentFilter);
-        }
-        
-        // Update button states based on selection
+        // 更新按钮状态
         updateButtonStates();
         
         // Show appropriate message if no records
-        if (m_model->rowCount() == 0) {
+        if (m_proxyModel->rowCount() == 0) {
             if (!currentFilter.isEmpty()) {
                 showMessage("未找到匹配的病历记录");
             } else {
@@ -304,26 +306,30 @@ void MedicalRecordWidget::onPatientDataChanged()
         // Store current search filter and selection
         QString currentFilter = ui->searchEdit->text();
         QModelIndexList selectedIndexes = ui->tableView->selectionModel()->selectedRows();
-        int selectedRow = selectedIndexes.isEmpty() ? -1 : selectedIndexes.first().row();
+        int selectedSourceRow = -1;
+        if (!selectedIndexes.isEmpty()) {
+            // 保存源模型的选中行号
+            QModelIndex sourceIndex = m_proxyModel->mapToSource(selectedIndexes.first());
+            selectedSourceRow = sourceIndex.row();
+        }
         
         // Refresh the model data
         m_model->refreshData();
         
-        // Reapply search filter if there was one
-        if (!currentFilter.isEmpty()) {
-            m_model->setFilter(currentFilter);
-        }
-        
         // Restore selection if possible
-        if (selectedRow >= 0 && selectedRow < m_model->rowCount()) {
-            ui->tableView->selectRow(selectedRow);
+        if (selectedSourceRow >= 0 && selectedSourceRow < m_model->rowCount()) {
+            // 转换源索引为代理索引并选中
+            QModelIndex proxyIndex = m_proxyModel->mapFromSource(m_model->index(selectedSourceRow, 0));
+            if (proxyIndex.isValid()) {
+                ui->tableView->selectRow(proxyIndex.row());
+            }
         }
         
         // Update button states
         updateButtonStates();
         
         // Show appropriate message if no records
-        if (m_model->rowCount() == 0) {
+        if (m_proxyModel->rowCount() == 0) {
             if (!currentFilter.isEmpty()) {
                 showMessage("未找到匹配的病历记录");
             } else {

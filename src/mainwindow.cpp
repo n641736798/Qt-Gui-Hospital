@@ -104,8 +104,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::loadAppConfig()
 {
-    // 默认配置：保持当前行为
-    mvcConfig.patients = false;        // 患者管理默认使用非 MVC
+    // 默认配置：都使用 MVC 模式
+    mvcConfig.patients = true;        // 患者管理默认使用 MVC
     mvcConfig.medicalRecords = true;   // 病历管理默认使用 MVC
 
     // 在若干典型路径中查找配置文件，适配不同运行目录
@@ -170,6 +170,12 @@ void MainWindow::loadAppConfig()
     qDebug() << "[MainWindow] MVC config loaded from" << configPath
              << "patients MVC =" << mvcConfig.patients
              << "medical_records MVC =" << mvcConfig.medicalRecords;
+
+    // 在状态栏显示当前MVC模式状态
+    QString statusText = QString("当前模式：患者管理(%1) | 病历管理(%2)")
+                            .arg(mvcConfig.patients ? "MVC" : "非MVC")
+                            .arg(mvcConfig.medicalRecords ? "MVC" : "非MVC");
+    statusBar()->showMessage(statusText);
 }
 
 MainWindow::~MainWindow()

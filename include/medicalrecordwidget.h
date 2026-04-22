@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QModelIndex>
 #include <QItemSelectionModel>
+#include <QSortFilterProxyModel>
 #include "medicalrecordmodel.h"
 #include "medicalrecorddialog.h"
 #include "databasemanager.h"
@@ -50,6 +51,7 @@ private:
     
     Ui::MedicalRecordWidget *ui;
     MedicalRecordModel *m_model;
+    QSortFilterProxyModel *m_proxyModel;
 };
 
 #endif // MEDICALRECORDWIDGET_H

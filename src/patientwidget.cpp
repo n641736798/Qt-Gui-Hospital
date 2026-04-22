@@ -6,7 +6,13 @@
 PatientWidget::PatientWidget(QWidget *parent)
     : QWidget(parent)
     , m_model(new PatientModel(this))
+    , m_proxyModel(new QSortFilterProxyModel(this))
 {
+    m_proxyModel->setSourceModel(m_model);
+    m_proxyModel->setFilterKeyColumn(-1); // 搜索所有列
+    m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_proxyModel->setSortCaseSensitivity(Qt::CaseInsensitive);
+    
     setupUI();
     setupConnections();
     refreshData();
@@ -89,11 +95,12 @@ void PatientWidget::setupUI()
 
     // 表格视图（MVC）
     m_tableView = new QTableView(this);
-    m_tableView->setModel(m_model);
+    m_tableView->setModel(m_proxyModel);
     m_tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_tableView->setSelectionMode(QAbstractItemView::SingleSelection);
     m_tableView->setAlternatingRowColors(true);
     m_tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_tableView->setSortingEnabled(true); // 开启排序功能
 
     m_tableView->setStyleSheet(R"(
         QTableView {
@@ -152,17 +159,16 @@ void PatientWidget::setupConnections()
 
 void PatientWidget::refreshData()
 {
-    const QString searchTerm = m_searchEdit ? m_searchEdit->text().trimmed() : QString();
     if (m_model) {
-        m_model->refresh(searchTerm);
+        m_model->refresh();
     }
     updateButtonStates();
 }
 
 void PatientWidget::onSearchTextChanged(const QString &text)
 {
-    if (m_model) {
-        m_model->refresh(text);
+    if (m_proxyModel) {
+        m_proxyModel->setFilterFixedString(text);
     }
     updateButtonStates();
 }
@@ -200,7 +206,9 @@ void PatientWidget::onEditPatient()
         return;
     }
 
-    const int row = currentIndex.row();
+    // 把代理模型的索引转换为源模型的索引
+    QModelIndex sourceIndex = m_proxyModel->mapToSource(currentIndex);
+    const int row = sourceIndex.row();
     Patient patient = m_model->getPatient(row);
     if (patient.id <= 0) {
         return;
@@ -233,7 +241,9 @@ void PatientWidget::onDeletePatient()
         return;
     }
 
-    const int row = currentIndex.row();
+    // 把代理模型的索引转换为源模型的索引
+    QModelIndex sourceIndex = m_proxyModel->mapToSource(currentIndex);
+    const int row = sourceIndex.row();
     Patient patient = m_model->getPatient(row);
     if (patient.id <= 0) {
         return;

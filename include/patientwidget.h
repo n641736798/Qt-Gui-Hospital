@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
+#include <QSortFilterProxyModel>
 #include "patientmodel.h"
 #include "patientdialog.h"
 
@@ -38,6 +39,7 @@ private:
     void updateButtonStates();
 
     PatientModel *m_model = nullptr;
+    QSortFilterProxyModel *m_proxyModel = nullptr;
     QTableView *m_tableView = nullptr;
     QLineEdit *m_searchEdit = nullptr;
     QPushButton *m_addButton = nullptr;
