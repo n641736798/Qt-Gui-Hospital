@@ -38,10 +38,39 @@ template <> constexpr inline auto DatabaseManager::qt_create_metaobjectdata<qt_m
 {
     namespace QMC = QtMocConstants;
     QtMocHelpers::StringRefStorage qt_stringData {
-        "DatabaseManager"
+        "DatabaseManager",
+        "patientDataChanged",
+        "",
+        "patientDeleted",
+        "patientId",
+        "medicalRecordAdded",
+        "recordId",
+        "medicalRecordUpdated",
+        "medicalRecordDeleted",
+        "medicalRecordDataChanged"
     };
 
     QtMocHelpers::UintData qt_methods {
+        // Signal 'patientDataChanged'
+        QtMocHelpers::SignalData<void()>(1, 2, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'patientDeleted'
+        QtMocHelpers::SignalData<void(int)>(3, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::Int, 4 },
+        }}),
+        // Signal 'medicalRecordAdded'
+        QtMocHelpers::SignalData<void(int)>(5, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::Int, 6 },
+        }}),
+        // Signal 'medicalRecordUpdated'
+        QtMocHelpers::SignalData<void(int)>(7, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::Int, 6 },
+        }}),
+        // Signal 'medicalRecordDeleted'
+        QtMocHelpers::SignalData<void(int)>(8, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::Int, 6 },
+        }}),
+        // Signal 'medicalRecordDataChanged'
+        QtMocHelpers::SignalData<void()>(9, 2, QMC::AccessPublic, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -63,10 +92,31 @@ Q_CONSTINIT const QMetaObject DatabaseManager::staticMetaObject = { {
 void DatabaseManager::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     auto *_t = static_cast<DatabaseManager *>(_o);
-    (void)_t;
-    (void)_c;
-    (void)_id;
-    (void)_a;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        switch (_id) {
+        case 0: _t->patientDataChanged(); break;
+        case 1: _t->patientDeleted((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
+        case 2: _t->medicalRecordAdded((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
+        case 3: _t->medicalRecordUpdated((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
+        case 4: _t->medicalRecordDeleted((*reinterpret_cast<std::add_pointer_t<int>>(_a[1]))); break;
+        case 5: _t->medicalRecordDataChanged(); break;
+        default: ;
+        }
+    }
+    if (_c == QMetaObject::IndexOfMethod) {
+        if (QtMocHelpers::indexOfMethod<void (DatabaseManager::*)()>(_a, &DatabaseManager::patientDataChanged, 0))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (DatabaseManager::*)(int )>(_a, &DatabaseManager::patientDeleted, 1))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (DatabaseManager::*)(int )>(_a, &DatabaseManager::medicalRecordAdded, 2))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (DatabaseManager::*)(int )>(_a, &DatabaseManager::medicalRecordUpdated, 3))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (DatabaseManager::*)(int )>(_a, &DatabaseManager::medicalRecordDeleted, 4))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (DatabaseManager::*)()>(_a, &DatabaseManager::medicalRecordDataChanged, 5))
+            return;
+    }
 }
 
 const QMetaObject *DatabaseManager::metaObject() const
@@ -85,6 +135,54 @@ void *DatabaseManager::qt_metacast(const char *_clname)
 int DatabaseManager::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QObject::qt_metacall(_c, _id, _a);
+    if (_id < 0)
+        return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 6)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 6;
+    }
+    if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 6)
+            *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
+        _id -= 6;
+    }
     return _id;
+}
+
+// SIGNAL 0
+void DatabaseManager::patientDataChanged()
+{
+    QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
+}
+
+// SIGNAL 1
+void DatabaseManager::patientDeleted(int _t1)
+{
+    QMetaObject::activate<void>(this, &staticMetaObject, 1, nullptr, _t1);
+}
+
+// SIGNAL 2
+void DatabaseManager::medicalRecordAdded(int _t1)
+{
+    QMetaObject::activate<void>(this, &staticMetaObject, 2, nullptr, _t1);
+}
+
+// SIGNAL 3
+void DatabaseManager::medicalRecordUpdated(int _t1)
+{
+    QMetaObject::activate<void>(this, &staticMetaObject, 3, nullptr, _t1);
+}
+
+// SIGNAL 4
+void DatabaseManager::medicalRecordDeleted(int _t1)
+{
+    QMetaObject::activate<void>(this, &staticMetaObject, 4, nullptr, _t1);
+}
+
+// SIGNAL 5
+void DatabaseManager::medicalRecordDataChanged()
+{
+    QMetaObject::activate(this, &staticMetaObject, 5, nullptr);
 }
 QT_WARNING_POP

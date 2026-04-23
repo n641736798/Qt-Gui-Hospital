@@ -41,6 +41,7 @@ public:
     QPushButton *toggleButton;
     QPushButton *homeButton;
     QPushButton *patientsButton;
+    QPushButton *medicalRecordsButton;
     QPushButton *appointmentsButton;
     QSpacerItem *verticalSpacer;
     QPushButton *settingsButton;
@@ -367,12 +368,22 @@ public:
 
         sidebarLayout->addWidget(patientsButton);
 
+        medicalRecordsButton = new QPushButton(sidebar);
+        medicalRecordsButton->setObjectName("medicalRecordsButton");
+        medicalRecordsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
+        QIcon icon3;
+        icon3.addFile(QString::fromUtf8(":/img/Report.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        medicalRecordsButton->setIcon(icon3);
+        medicalRecordsButton->setIconSize(QSize(24, 24));
+
+        sidebarLayout->addWidget(medicalRecordsButton);
+
         appointmentsButton = new QPushButton(sidebar);
         appointmentsButton->setObjectName("appointmentsButton");
         appointmentsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
-        QIcon icon3;
-        icon3.addFile(QString::fromUtf8(":/img/Appointments.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        appointmentsButton->setIcon(icon3);
+        QIcon icon4;
+        icon4.addFile(QString::fromUtf8(":/img/Appointments.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        appointmentsButton->setIcon(icon4);
         appointmentsButton->setIconSize(QSize(24, 24));
 
         sidebarLayout->addWidget(appointmentsButton);
@@ -384,9 +395,9 @@ public:
         settingsButton = new QPushButton(sidebar);
         settingsButton->setObjectName("settingsButton");
         settingsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
-        QIcon icon4;
-        icon4.addFile(QString::fromUtf8(":/img/Settings.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        settingsButton->setIcon(icon4);
+        QIcon icon5;
+        icon5.addFile(QString::fromUtf8(":/img/Settings.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        settingsButton->setIcon(icon5);
         settingsButton->setIconSize(QSize(24, 24));
 
         sidebarLayout->addWidget(settingsButton);
@@ -415,26 +426,26 @@ public:
 
         pushButton_3 = new QPushButton(topbar);
         pushButton_3->setObjectName("pushButton_3");
-        QIcon icon5;
-        icon5.addFile(QString::fromUtf8(":/img/minus.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        pushButton_3->setIcon(icon5);
+        QIcon icon6;
+        icon6.addFile(QString::fromUtf8(":/img/minus.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        pushButton_3->setIcon(icon6);
 
         horizontalLayout_2->addWidget(pushButton_3);
 
         pushButton_2 = new QPushButton(topbar);
         pushButton_2->setObjectName("pushButton_2");
         pushButton_2->setMaximumSize(QSize(16777215, 16777215));
-        QIcon icon6;
-        icon6.addFile(QString::fromUtf8(":/img/maximize.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        pushButton_2->setIcon(icon6);
+        QIcon icon7;
+        icon7.addFile(QString::fromUtf8(":/img/maximize.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        pushButton_2->setIcon(icon7);
 
         horizontalLayout_2->addWidget(pushButton_2);
 
         close = new QPushButton(topbar);
         close->setObjectName("close");
-        QIcon icon7;
-        icon7.addFile(QString::fromUtf8(":/img/x.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
-        close->setIcon(icon7);
+        QIcon icon8;
+        icon8.addFile(QString::fromUtf8(":/img/x.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        close->setIcon(icon8);
 
         horizontalLayout_2->addWidget(close);
 
@@ -657,6 +668,7 @@ public:
         toggleButton->setText(QCoreApplication::translate("MainWindow", "\345\214\273\351\231\242\347\263\273\347\273\237", nullptr));
         homeButton->setText(QCoreApplication::translate("MainWindow", "\344\273\252\350\241\250\347\233\230", nullptr));
         patientsButton->setText(QCoreApplication::translate("MainWindow", "\346\202\243\350\200\205\347\256\241\347\220\206", nullptr));
+        medicalRecordsButton->setText(QCoreApplication::translate("MainWindow", "\347\227\205\345\216\206\347\256\241\347\220\206", nullptr));
         appointmentsButton->setText(QCoreApplication::translate("MainWindow", "\351\242\204\347\272\246\347\256\241\347\220\206", nullptr));
         settingsButton->setText(QCoreApplication::translate("MainWindow", "\347\263\273\347\273\237\350\256\276\347\275\256", nullptr));
         pushButton_3->setText(QString());

@@ -2,12 +2,38 @@
 #include "databasemanager.h"
 
 #include <QHeaderView>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QCoreApplication>
 
 PatientWidget::PatientWidget(QWidget *parent)
     : QWidget(parent)
     , m_model(new PatientModel(this))
     , m_proxyModel(new QSortFilterProxyModel(this))
 {
+    // 读取配置文件中的懒加载设置
+    QString configPath = QCoreApplication::applicationDirPath() + "/../config/app_config.json";
+    QFile configFile(configPath);
+    if (!configFile.exists()) {
+        configPath = "config/app_config.json";
+        configFile.setFileName(configPath);
+    }
+    
+    if (configFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QByteArray jsonData = configFile.readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+        if (doc.isObject()) {
+            QJsonObject rootObj = doc.object();
+            QJsonObject lazyLoadingObj = rootObj.value("lazy_loading").toObject();
+            bool lazyEnabled = lazyLoadingObj.value("enabled").toBool(true);
+            m_model->setLazyLoadingEnabled(lazyEnabled);
+        }
+        configFile.close();
+    } else {
+        qDebug() << "无法打开配置文件:" << configFile.fileName() << "错误:" << configFile.errorString();
+    }
+    
     m_proxyModel->setSourceModel(m_model);
     m_proxyModel->setFilterKeyColumn(-1); // 搜索所有列
     m_proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);

@@ -8,6 +8,7 @@
 
 #include "../../../include/mainwindow.h"
 #include <QtGui/qtextcursor.h>
+#include <QtGui/qscreen.h>
 #include <QtCore/qmetatype.h>
 
 #include <QtCore/qtmochelpers.h>
@@ -53,6 +54,7 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "on_patientsButton_clicked",
         "on_homeButton_clicked",
         "on_appointmentsButton_clicked",
+        "on_medicalRecordsButton_clicked",
         "onAddPatientClicked",
         "onEditPatientClicked",
         "onDeletePatientClicked",
@@ -62,6 +64,11 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "column",
         "refreshPatientTable",
         "updateDashboardWithRealData",
+        "onAddRecordClicked",
+        "onEditRecordClicked",
+        "onDeleteRecordClicked",
+        "onSearchMedicalRecords",
+        "refreshMedicalRecordTable",
         "onECGDataReceived",
         "ECGDataPoint",
         "data"
@@ -94,25 +101,37 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void()>(12, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'on_appointmentsButton_clicked'
         QtMocHelpers::SlotData<void()>(13, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onAddPatientClicked'
+        // Slot 'on_medicalRecordsButton_clicked'
         QtMocHelpers::SlotData<void()>(14, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onEditPatientClicked'
+        // Slot 'onAddPatientClicked'
         QtMocHelpers::SlotData<void()>(15, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onDeletePatientClicked'
+        // Slot 'onEditPatientClicked'
         QtMocHelpers::SlotData<void()>(16, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'onSearchPatients'
+        // Slot 'onDeletePatientClicked'
         QtMocHelpers::SlotData<void()>(17, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onSearchPatients'
+        QtMocHelpers::SlotData<void()>(18, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onPatientTableDoubleClicked'
-        QtMocHelpers::SlotData<void(int, int)>(18, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::Int, 19 }, { QMetaType::Int, 20 },
+        QtMocHelpers::SlotData<void(int, int)>(19, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 20 }, { QMetaType::Int, 21 },
         }}),
         // Slot 'refreshPatientTable'
-        QtMocHelpers::SlotData<void()>(21, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'updateDashboardWithRealData'
         QtMocHelpers::SlotData<void()>(22, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'updateDashboardWithRealData'
+        QtMocHelpers::SlotData<void()>(23, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onAddRecordClicked'
+        QtMocHelpers::SlotData<void()>(24, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onEditRecordClicked'
+        QtMocHelpers::SlotData<void()>(25, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onDeleteRecordClicked'
+        QtMocHelpers::SlotData<void()>(26, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onSearchMedicalRecords'
+        QtMocHelpers::SlotData<void()>(27, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'refreshMedicalRecordTable'
+        QtMocHelpers::SlotData<void()>(28, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onECGDataReceived'
-        QtMocHelpers::SlotData<void(const ECGDataPoint &)>(23, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 24, 25 },
+        QtMocHelpers::SlotData<void(const ECGDataPoint &)>(29, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 30, 31 },
         }}),
     };
     QtMocHelpers::UintData qt_properties {
@@ -147,14 +166,20 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 7: _t->on_patientsButton_clicked(); break;
         case 8: _t->on_homeButton_clicked(); break;
         case 9: _t->on_appointmentsButton_clicked(); break;
-        case 10: _t->onAddPatientClicked(); break;
-        case 11: _t->onEditPatientClicked(); break;
-        case 12: _t->onDeletePatientClicked(); break;
-        case 13: _t->onSearchPatients(); break;
-        case 14: _t->onPatientTableDoubleClicked((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2]))); break;
-        case 15: _t->refreshPatientTable(); break;
-        case 16: _t->updateDashboardWithRealData(); break;
-        case 17: _t->onECGDataReceived((*reinterpret_cast<std::add_pointer_t<ECGDataPoint>>(_a[1]))); break;
+        case 10: _t->on_medicalRecordsButton_clicked(); break;
+        case 11: _t->onAddPatientClicked(); break;
+        case 12: _t->onEditPatientClicked(); break;
+        case 13: _t->onDeletePatientClicked(); break;
+        case 14: _t->onSearchPatients(); break;
+        case 15: _t->onPatientTableDoubleClicked((*reinterpret_cast<std::add_pointer_t<int>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<int>>(_a[2]))); break;
+        case 16: _t->refreshPatientTable(); break;
+        case 17: _t->updateDashboardWithRealData(); break;
+        case 18: _t->onAddRecordClicked(); break;
+        case 19: _t->onEditRecordClicked(); break;
+        case 20: _t->onDeleteRecordClicked(); break;
+        case 21: _t->onSearchMedicalRecords(); break;
+        case 22: _t->refreshMedicalRecordTable(); break;
+        case 23: _t->onECGDataReceived((*reinterpret_cast<std::add_pointer_t<ECGDataPoint>>(_a[1]))); break;
         default: ;
         }
     }
@@ -179,14 +204,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 18)
+        if (_id < 24)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 18;
+        _id -= 24;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 18)
+        if (_id < 24)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 18;
+        _id -= 24;
     }
     return _id;
 }

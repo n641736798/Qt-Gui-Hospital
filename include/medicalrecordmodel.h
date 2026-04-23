@@ -51,6 +51,10 @@ public:
     // Data refresh
     void refreshData();
 
+    // 懒加载配置接口
+    void setLazyLoadingEnabled(bool enabled);
+    bool isLazyLoadingEnabled() const;
+
 public slots:
     void refresh();
 
@@ -64,6 +68,7 @@ private:
     int m_currentPage; // 当前已经加载到的页码
     bool m_hasMore; // 是否还有更多数据可以加载
     int m_totalCount; // 总数据条数
+    bool m_lazyLoadingEnabled = true; // 是否启用懒加载，默认开启
 };
 
 #endif // MEDICALRECORDMODEL_H

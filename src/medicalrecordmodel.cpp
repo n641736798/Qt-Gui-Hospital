@@ -30,9 +30,23 @@ int MedicalRecordModel::rowCount(const QModelIndex &parent) const
 
 bool MedicalRecordModel::canFetchMore(const QModelIndex &parent) const
 {
-    if (parent.isValid())
+    if (parent.isValid() || !m_lazyLoadingEnabled)
         return false;
     return m_hasMore;
+}
+
+void MedicalRecordModel::setLazyLoadingEnabled(bool enabled)
+{
+    m_lazyLoadingEnabled = enabled;
+    if (!enabled) {
+        // 关闭懒加载时，已经加载的数据保持不变，后续不再自动加载更多
+        m_hasMore = false;
+    }
+}
+
+bool MedicalRecordModel::isLazyLoadingEnabled() const
+{
+    return m_lazyLoadingEnabled;
 }
 
 void MedicalRecordModel::fetchMore(const QModelIndex &parent)
@@ -195,8 +209,19 @@ void MedicalRecordModel::refreshData()
     m_records.clear();
     endResetModel();
 
-    // 加载第一页
-    fetchMore(QModelIndex());
+    if (!m_lazyLoadingEnabled) {
+        // 懒加载关闭时，一次性加载所有数据
+        QList<MedicalRecord> allRecords = m_dbManager->getMedicalRecordsByPage(0, m_totalCount);
+        
+        beginInsertRows(QModelIndex(), 0, allRecords.size() - 1);
+        m_records = allRecords;
+        endInsertRows();
+        
+        m_hasMore = false;
+    } else {
+        // 懒加载开启时，只加载第一页
+        fetchMore(QModelIndex());
+    }
 }
 
 

@@ -45,6 +45,10 @@ public:
     // 业务辅助接口，便于外部根据行号拿到 Patient 结构体
     Patient getPatient(int row) const;
 
+    // 懒加载配置接口
+    void setLazyLoadingEnabled(bool enabled);
+    bool isLazyLoadingEnabled() const;
+
 private:
     QList<Patient> m_patients;
     DatabaseManager *m_dbManager;
@@ -52,6 +56,7 @@ private:
     int m_currentPage; // 当前已经加载到的页码
     bool m_hasMore; // 是否还有更多数据可以加载
     int m_totalCount; // 总数据条数
+    bool m_lazyLoadingEnabled = true; // 是否启用懒加载，默认开启
 };
 
 #endif // PATIENTMODEL_H

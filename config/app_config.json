@@ -2,7 +2,12 @@
   "//": "MVC / 非 MVC 切换配置示例。",
   "//_comment": "patients: 是否为患者管理启用 MVC；medical_records: 是否为病历管理启用 MVC。",
   "mvc": {
-    "patients": true,
-    "medical_records": true
+    "patients": false,
+    "medical_records": false
+  },
+  "lazy_loading": {
+    "enabled": false,
+    "patient_page_size": 20,
+    "medical_record_page_size": 20
   }
 }

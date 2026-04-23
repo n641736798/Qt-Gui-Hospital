@@ -80,9 +80,23 @@ QVariant PatientModel::headerData(int section, Qt::Orientation orientation, int 
 
 bool PatientModel::canFetchMore(const QModelIndex &parent) const
 {
-    if (parent.isValid())
+    if (parent.isValid() || !m_lazyLoadingEnabled)
         return false;
     return m_hasMore;
+}
+
+void PatientModel::setLazyLoadingEnabled(bool enabled)
+{
+    m_lazyLoadingEnabled = enabled;
+    if (!enabled) {
+        // 关闭懒加载时，已经加载的数据保持不变，后续不再自动加载更多
+        m_hasMore = false;
+    }
+}
+
+bool PatientModel::isLazyLoadingEnabled() const
+{
+    return m_lazyLoadingEnabled;
 }
 
 void PatientModel::fetchMore(const QModelIndex &parent)
@@ -132,8 +146,24 @@ void PatientModel::refresh(const QString &searchTerm)
     m_patients.clear();
     endResetModel();
 
-    // 加载第一页
-    fetchMore(QModelIndex());
+    if (!m_lazyLoadingEnabled) {
+        // 懒加载关闭时，一次性加载所有数据
+        QList<Patient> allPatients;
+        if (m_currentSearchTerm.isEmpty()) {
+            allPatients = m_dbManager->getPatientsByPage(0, m_totalCount);
+        } else {
+            allPatients = m_dbManager->searchPatientsByPage(m_currentSearchTerm, 0, m_totalCount);
+        }
+        
+        beginInsertRows(QModelIndex(), 0, allPatients.size() - 1);
+        m_patients = allPatients;
+        endInsertRows();
+        
+        m_hasMore = false;
+    } else {
+        // 懒加载开启时，只加载第一页
+        fetchMore(QModelIndex());
+    }
 }
 
 Patient PatientModel::getPatient(int row) const

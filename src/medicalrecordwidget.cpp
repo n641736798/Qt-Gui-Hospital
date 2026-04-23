@@ -2,6 +2,10 @@
 #include "ui_medicalrecordwidget.h"
 #include "medicalrecorddialog.h"
 #include <QDebug>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QCoreApplication>
 
 MedicalRecordWidget::MedicalRecordWidget(QWidget *parent)
     : QWidget(parent)
@@ -26,6 +30,28 @@ void MedicalRecordWidget::setupUI()
     
     // Create and setup the medical record model
     m_model = new MedicalRecordModel(this);
+    
+    // 读取配置文件中的懒加载设置
+    QString configPath = QCoreApplication::applicationDirPath() + "/../config/app_config.json";
+    QFile configFile(configPath);
+    if (!configFile.exists()) {
+        configPath = "config/app_config.json";
+        configFile.setFileName(configPath);
+    }
+    
+    if (configFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QByteArray jsonData = configFile.readAll();
+        QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+        if (doc.isObject()) {
+            QJsonObject rootObj = doc.object();
+            QJsonObject lazyLoadingObj = rootObj.value("lazy_loading").toObject();
+            bool lazyEnabled = lazyLoadingObj.value("enabled").toBool(true);
+            m_model->setLazyLoadingEnabled(lazyEnabled);
+        }
+        configFile.close();
+    } else {
+        qDebug() << "无法打开配置文件:" << configFile.fileName() << "错误:" << configFile.errorString();
+    }
     
     // 创建排序过滤代理模型
     m_proxyModel = new QSortFilterProxyModel(this);
