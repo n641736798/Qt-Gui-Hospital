@@ -1,5 +1,6 @@
 release/main.o
 release/mainwindow.o
+release/mainwindow_chart.o
 release/databasemanager.o
 release/patientdialog.o
 release/ecgdatathread.o
@@ -9,6 +10,8 @@ release/medicalrecorddialog.o
 release/qcustomplot.o
 release/patientmodel.o
 release/patientwidget.o
+release/qcustomplotchart_adapter.o
+release/qtchart_adapter.o
 release/qrc_resources.o
 release/moc_mainwindow.o
 release/moc_databasemanager.o
@@ -20,3 +23,6 @@ release/moc_medicalrecorddialog.o
 release/moc_qcustomplot.o
 release/moc_patientmodel.o
 release/moc_patientwidget.o
+release/moc_iecgchart.o
+release/moc_qcustomplotchart_adapter.o
+release/moc_qtchart_adapter.o

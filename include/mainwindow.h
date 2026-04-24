@@ -20,6 +20,7 @@
 #include "medicalrecorddialog.h"
 #include "patientwidget.h"
 #include "qcustomplot.h"
+#include "iecgchart.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -73,6 +74,11 @@ private:
         bool medicalRecords = true;    // 默认：病历管理使用 MVC（当前实现）
     };
 
+    enum class ChartRenderer {
+        QCustomPlot,
+        QtChart
+    };
+
     Ui::MainWindow *ui;
     bool isSidebarOpen = true; // Sidebar starts open as per the UI file
     QPropertyAnimation *sidebarAnimation;
@@ -86,7 +92,6 @@ private:
     bool createDatabaseIfNotExists(const QString &host, const QString &username, const QString &password);
     void populatePatientTable(const QList<Patient> &patients);
     void populateMedicalRecordTable(const QList<MedicalRecord> &records);
-    void setChildrenBackground(QWidget *widget, const QColor &color);
 
     bool dragging = false;
     QPoint dragPosition;
@@ -114,7 +119,7 @@ private:
     
     // ECG Dashboard
     ECGDataThread *ecgDataThread;
-    QList<QCustomPlot*> ecgPlots;
+    QList<IECGChart*> ecgCharts;
     QList<QList<QPointF>> ecgDataBuffers; // 为每个导联存储数据点
     static const int MAX_DATA_POINTS = 200; // 最大显示数据点数
     int axisUpdateCounter; // 坐标轴更新计数器
@@ -122,8 +127,10 @@ private:
     void setupECGThread();
     void updateECGDisplay(const ECGDataPoint &data);
     void batchUpdateCharts(); // 批量更新图表
+    IECGChart* createChart(const QString &title, const QString &yAxisLabel, double yMin, double yMax);
 
     MvcConfig mvcConfig;
+    ChartRenderer m_chartRenderer = ChartRenderer::QCustomPlot; // 默认使用QCustomPlot
 };
 
 #endif // MAINWINDOW_H

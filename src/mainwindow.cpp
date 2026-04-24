@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "qcustomplotchart_adapter.h"
+#include "qtchart_adapter.h"
 #include "qcustomplot.h"
 
 #include <QPen>
@@ -19,6 +21,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonParseError>
+#include <QMessageBox>
 #include <cmath>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -37,36 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
         ecgDataBuffers[i].reserve(MAX_DATA_POINTS);
     }
 
-    // 设置主窗体背景色 - 强制应用
-    this->setStyleSheet(R"(
-        QMainWindow {
-            background-color: #F5E6D3 !important;
-        }
-        QMainWindow::centralWidget {
-            background-color: #F5E6D3 !important;
-        }
-        QWidget#homePage {
-            background-color: #F5E6D3 !important;
-        }
-        QWidget#patientsPage {
-            background-color: #F5E6D3 !important;
-        }
-        QWidget#appointmentsPage {
-            background-color: #F5E6D3 !important;
-        }
-    )");
-    
-    // 同时设置调色板确保背景色生效
-    QPalette palette = this->palette();
-    palette.setColor(QPalette::Window, QColor("#F5E6D3"));
-    palette.setColor(QPalette::Base, QColor("#F5E6D3"));
-    this->setPalette(palette);
-    
-    // 强制设置各个页面的背景色
-    ui->homePage->setStyleSheet("background-color: #F5E6D3;");
-    ui->patientsPage->setStyleSheet("background-color: #F5E6D3;");
-    ui->appointmentsPage->setStyleSheet("background-color: #F5E6D3;");
-    ui->contentStackWidget->setStyleSheet("background-color: #F5E6D3;");
+    // 样式已在 UI 文件中设置，无需重复设置
 
     // Sidebar animation setup
     sidebarAnimation = new QPropertyAnimation(ui->sidebar, "minimumWidth", this);
@@ -94,12 +68,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Set initial page to home
     ui->contentStackWidget->setCurrentWidget(ui->homePage);
-    
-    // 最后的背景色强制设置 - 确保所有组件都是暖色
-    QTimer::singleShot(100, this, [this]() {
-        // 递归设置所有子组件的背景色
-        setChildrenBackground(this, QColor("#F5E6D3"));
-    });
 }
 
 void MainWindow::loadAppConfig()
@@ -113,17 +81,16 @@ void MainWindow::loadAppConfig()
     const QString appDirPath = QCoreApplication::applicationDirPath();
     QDir appDir(appDirPath);
 
-    // 典型目录结构示例：
-    //   项目根/
-    //     config/app_config.json          <-- 配置实际所在位置
-    //     build/Kit-Debug/debug/Hospital_reorganized.exe
-    //
-    // applicationDirPath() 一般是 build/.../debug 目录，
-    // 所以需要向上 3 级才能回到项目根，再进入 config。
-    candidatePaths << appDir.filePath("config/app_config.json");        // 与可执行文件同级的 config/
-    candidatePaths << appDir.filePath("../config/app_config.json");     // 上一级目录的 config/
-    candidatePaths << appDir.filePath("../../config/app_config.json");  // 上上级目录的 config/（保留以兼容旧结构）
-    candidatePaths << appDir.filePath("../../../config/app_config.json"); // 返回到项目根的 config/
+    candidatePaths << appDir.filePath("config/app_config.json");
+    candidatePaths << appDir.filePath("../config/app_config.json");
+    candidatePaths << appDir.filePath("../../config/app_config.json");
+    candidatePaths << appDir.filePath("../../../config/app_config.json");
+    candidatePaths << appDir.filePath("../../../../config/app_config.json");
+    candidatePaths << appDir.filePath("../../../../../config/app_config.json");
+    candidatePaths << "D:/study/C++ code/Qt-Gui-Hospital-main/config/app_config.json";
+    
+    qDebug() << "[MainWindow] Application directory:" << appDirPath;
+    qDebug() << "[MainWindow] Searching config files...";
 
     QString configPath;
     for (const QString &path : candidatePaths) {
@@ -134,8 +101,7 @@ void MainWindow::loadAppConfig()
     }
 
     if (configPath.isEmpty()) {
-        qDebug() << "[MainWindow] app_config.json not found, using default MVC config."
-                 << "searched from" << appDirPath;
+        qDebug() << "[MainWindow] app_config.json not found, using default MVC config.";
         return;
     }
 
@@ -167,14 +133,31 @@ void MainWindow::loadAppConfig()
         }
     }
 
-    qDebug() << "[MainWindow] MVC config loaded from" << configPath
-             << "patients MVC =" << mvcConfig.patients
-             << "medical_records MVC =" << mvcConfig.medicalRecords;
+    // 读取图表渲染器配置
+    if (root.contains("chart_renderer")) {
+        QString renderer = root.value("chart_renderer").toString().toLower();
+        if (renderer == "qtchart") {
+            m_chartRenderer = ChartRenderer::QtChart;
+        } else {
+            m_chartRenderer = ChartRenderer::QCustomPlot;
+        }
+    }
 
-    // 在状态栏显示当前MVC模式状态
-    QString statusText = QString("当前模式：患者管理(%1) | 病历管理(%2)")
+    QString rendererName = (m_chartRenderer == ChartRenderer::QCustomPlot) ? "QCustomPlot" : "QtChart";
+    qDebug() << "[MainWindow] config loaded from" << configPath
+             << "patients MVC =" << mvcConfig.patients
+             << "medical_records MVC =" << mvcConfig.medicalRecords
+             << "chart renderer =" << rendererName;
+
+    // 显示配置加载成功的信息（可选）
+    // QMessageBox::information(nullptr, "配置加载成功", 
+    //     QString("配置文件: %1\n图表渲染器: %2").arg(configPath, rendererName));
+
+    // 在状态栏显示当前模式状态
+    QString statusText = QString("当前模式：患者管理(%1) | 病历管理(%2) | 图表渲染(%3)")
                             .arg(mvcConfig.patients ? "MVC" : "非MVC")
-                            .arg(mvcConfig.medicalRecords ? "MVC" : "非MVC");
+                            .arg(mvcConfig.medicalRecords ? "MVC" : "非MVC")
+                            .arg(rendererName);
     statusBar()->showMessage(statusText);
 }
 
@@ -816,11 +799,30 @@ void MainWindow::setupECGDashboard()
     statsGrid->addWidget(ecgFrames[2], 1, 0, 1, 2); // 左下，跨2列
     statsGrid->addWidget(ecgFrames[3], 1, 2, 1, 2); // 右下，跨2列
 
+    // 创建图表渲染器标识标签
+    QLabel *rendererLabel = new QLabel();
+    QString rendererName = (m_chartRenderer == ChartRenderer::QCustomPlot) ? "QCustomPlot" : "QtChart";
+    QString rendererColor = (m_chartRenderer == ChartRenderer::QCustomPlot) ? "#FF4444" : "#2C5F2D";
+    rendererLabel->setText(QString("📊 当前图表渲染器: %1").arg(rendererName));
+    rendererLabel->setStyleSheet(QString(
+        "color: %1;"
+        "font-size: 12pt;"
+        "font-weight: bold;"
+        "padding: 8px;"
+        "background-color: #FFFFFF;"
+        "border-radius: 6px;"
+        "border: 2px solid %1;"
+    ).arg(rendererColor));
+    rendererLabel->setAlignment(Qt::AlignCenter);
+    
+    // 将渲染器标识添加到第一个框架的顶部
+    ecgLayouts[0]->addWidget(rendererLabel);
+
     // 创建4通道心电图（QCustomPlot）
     QStringList channelNames;
     channelNames << "导联 I" << "导联 II" << "导联 III" << "导联 aVR";
 
-    ecgPlots.clear();
+    ecgCharts.clear();
 
     for (int i = 0; i < 4; ++i) {
         // 创建标题标签
@@ -828,39 +830,13 @@ void MainWindow::setupECGDashboard()
         titleLabel->setStyleSheet("color: #8B4513; font-size: 14pt; font-weight: bold; padding: 5px;");
         ecgLayouts[i]->addWidget(titleLabel);
 
-        // 创建 QCustomPlot
-        QCustomPlot *customPlot = new QCustomPlot();
-        ecgPlots.append(customPlot);
+        // 创建图表
+        IECGChart *chart = createChart(channelNames[i], "幅值(mV)", -2, 2);
+        ecgCharts.append(chart);
 
-        customPlot->addGraph();
-        QCPGraph *graph = customPlot->graph(0);
-
-        QPen pen(QColor("#FF4444"));
-        pen.setWidth(2);
-        graph->setPen(pen);
-
-        QCPAxis *xAxis = customPlot->xAxis;
-        xAxis->setRange(0, 10);
-        xAxis->grid()->setVisible(true);
-        xAxis->grid()->setPen(QPen(QColor("#E0E0E0"), 1, Qt::DotLine));
-        xAxis->setTicks(false);
-        xAxis->setTickLabels(false);
-        xAxis->setBasePen(Qt::NoPen);
-        xAxis->setSubTicks(false);
-
-        QCPAxis *yAxis = customPlot->yAxis;
-        yAxis->setRange(-2, 2);
-        yAxis->grid()->setVisible(true);
-        yAxis->grid()->setPen(QPen(QColor("#E0E0E0"), 1, Qt::DotLine));
-        yAxis->setTicks(false);
-        yAxis->setTickLabels(false);
-        yAxis->setBasePen(Qt::NoPen);
-        yAxis->setSubTicks(false);
-
-        customPlot->setBackground(QBrush(QColor("#FFFFFF")));
-        customPlot->setMinimumHeight(150);
-
-        ecgLayouts[i]->addWidget(customPlot);
+        // 添加到布局
+        ecgLayouts[i]->addWidget(chart);
+        chart->setMinimumHeight(150);
     }
 }
 
@@ -919,21 +895,18 @@ void MainWindow::updateECGDisplay(const ECGDataPoint &data)
 
 void MainWindow::batchUpdateCharts()
 {
-    for (int i = 0; i < 4 && i < ecgPlots.size() && i < ecgDataBuffers.size(); ++i) {
-        QCustomPlot *plot = ecgPlots[i];
-        QCPGraph *graph = plot->graph(0);
-
+    // 直接更新图表数据，不清除
+    for (int i = 0; i < 4 && i < ecgCharts.size() && i < ecgDataBuffers.size(); ++i) {
+        IECGChart *chart = ecgCharts[i];
+        
+        // 只添加新数据点，不清除旧数据
+        // 注意：addDataPoint内部会管理缓冲区大小
         if (!ecgDataBuffers[i].isEmpty()) {
-            QVector<double> keys, values;
-            keys.reserve(ecgDataBuffers[i].size());
-            values.reserve(ecgDataBuffers[i].size());
-
+            // 清除并重新设置数据（适配器内部会管理）
+            chart->clearData();
             for (const QPointF &point : ecgDataBuffers[i]) {
-                keys.append(point.x());
-                values.append(point.y());
+                chart->addDataPoint(point.x(), point.y());
             }
-
-            graph->setData(keys, values);
         }
     }
 
@@ -941,18 +914,19 @@ void MainWindow::batchUpdateCharts()
     if (axisUpdateCounter >= 10) {
         axisUpdateCounter = 0;
 
-        for (int i = 0; i < 4 && i < ecgPlots.size() && i < ecgDataBuffers.size(); ++i) {
+        for (int i = 0; i < 4 && i < ecgCharts.size() && i < ecgDataBuffers.size(); ++i) {
             if (!ecgDataBuffers[i].isEmpty()) {
-                QCustomPlot *plot = ecgPlots[i];
+                IECGChart *chart = ecgCharts[i];
                 double currentTime = ecgDataBuffers[i].last().x();
                 double windowSize = 10.0;
-                plot->xAxis->setRange(currentTime - windowSize, currentTime);
+                chart->setXRange(currentTime - windowSize, currentTime);
             }
         }
     }
 
-    for (QCustomPlot *plot : ecgPlots) {
-        plot->replot();
+    // 统一更新所有图表显示
+    for (IECGChart *chart : ecgCharts) {
+        chart->updateDisplay();
     }
 }
 
@@ -1113,27 +1087,4 @@ bool MainWindow::createDatabaseIfNotExists(const QString &host, const QString &u
     
     return success;
 }
-void MainWindow::setChildrenBackground(QWidget *widget, const QColor &color)
-{
-    if (!widget) return;
-    
-    // 设置当前组件的背景色
-    QString colorStr = color.name();
-    widget->setStyleSheet(QString("background-color: %1;").arg(colorStr));
-    
-    // 递归设置所有子组件
-    QList<QWidget*> children = widget->findChildren<QWidget*>();
-    for (QWidget *child : children) {
-        if (child->inherits("QCustomPlot")) {
-            continue;
-        }
-
-        // 跳过已经有白色背景的卡片
-        if (child->objectName().contains("Frame") && 
-            child->styleSheet().contains("background-color: #FFFFFF")) {
-            continue;
-        }
-        
-        child->setStyleSheet(QString("background-color: %1;").arg(colorStr));
-    }
-}
+// setChildrenBackground 函数已移除 - 样式现在由 UI 文件统一管理

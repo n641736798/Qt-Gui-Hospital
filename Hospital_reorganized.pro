@@ -1,6 +1,23 @@
-QT += core gui sql printsupport
-# ECG dashboard uses QCustomPlot; Qt Charts removed.
+QT += core gui sql printsupport charts
+# 同时支持QCustomPlot和QtChart两种渲染引擎，可通过配置文件切换
 # printsupport: QCustomPlot uses QPrinter (PDF/print export)
+
+# OpenCV 4.12 支持（医学影像查看功能）
+win32 {
+    OPENCV_PATH = D:/software/openCV/opencv/build
+    INCLUDEPATH += $$OPENCV_PATH/include
+    
+    # 根据构建类型选择 Debug 或 Release 库
+    CONFIG(debug, debug|release) {
+        LIBS += -L$$OPENCV_PATH/x64/vc16/lib -lopencv_world4120d
+    } else {
+        LIBS += -L$$OPENCV_PATH/x64/vc16/lib -lopencv_world4120
+    }
+}
+unix {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += opencv4
+}
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,6 +37,7 @@ win32-g++: QMAKE_CXXFLAGS += -Wa,-mbig-obj
 SOURCES += \
     src/main.cpp \
     src/mainwindow.cpp \
+    src/mainwindow_chart.cpp \
     src/databasemanager.cpp \
     src/patientdialog.cpp \
     src/ecgdatathread.cpp \
@@ -28,7 +46,12 @@ SOURCES += \
     src/medicalrecorddialog.cpp \
     src/qcustomplot.cpp \
     src/patientmodel.cpp \
-    src/patientwidget.cpp
+    src/patientwidget.cpp \
+    src/qcustomplotchart_adapter.cpp \
+    src/qtchart_adapter.cpp
+# OpenCV 文件（需要安装 OpenCV 后才能编译）
+# src/medicalimageviewer.cpp
+# src/imageviewerdialog.cpp
 
 # 头文件路径（qcustomplot.h 须在 HEADERS 中，以便对 Q_OBJECT/signals 运行 MOC）
 HEADERS += \
@@ -41,7 +64,13 @@ HEADERS += \
     include/medicalrecorddialog.h \
     include/qcustomplot.h \
     include/patientmodel.h \
-    include/patientwidget.h
+    include/patientwidget.h \
+    include/iecgchart.h \
+    include/qcustomplotchart_adapter.h \
+    include/qtchart_adapter.h
+# OpenCV 头文件（需要安装 OpenCV 后才能编译）
+# include/medicalimageviewer.h
+# include/imageviewerdialog.h
 
 # UI文件路径
 FORMS += \

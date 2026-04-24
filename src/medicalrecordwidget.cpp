@@ -67,6 +67,10 @@ void MedicalRecordWidget::setupUI()
     ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->tableView->setSortingEnabled(true);
     ui->tableView->setAlternatingRowColors(true);
+    ui->tableView->setShowGrid(false);
+    
+    // Hide vertical header (row numbers) to remove left margin
+    ui->tableView->verticalHeader()->setVisible(false);
     
     // Set column widths
     QHeaderView *header = ui->tableView->horizontalHeader();

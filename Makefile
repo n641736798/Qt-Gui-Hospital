@@ -304,7 +304,10 @@ Makefile: Hospital_reorganized.pro ../../../software/Qt/6.10.1/mingw_64/mkspecs/
 		../../../software/Qt/6.10.1/mingw_64/mkspecs/features/lex.prf \
 		Hospital_reorganized.pro \
 		../../../software/Qt/6.10.1/mingw_64/lib/Qt6PrintSupport.prl \
+		../../../software/Qt/6.10.1/mingw_64/lib/Qt6Charts.prl \
+		../../../software/Qt/6.10.1/mingw_64/lib/Qt6OpenGLWidgets.prl \
 		../../../software/Qt/6.10.1/mingw_64/lib/Qt6Widgets.prl \
+		../../../software/Qt/6.10.1/mingw_64/lib/Qt6OpenGL.prl \
 		../../../software/Qt/6.10.1/mingw_64/lib/Qt6Gui.prl \
 		../../../software/Qt/6.10.1/mingw_64/lib/Qt6Sql.prl \
 		../../../software/Qt/6.10.1/mingw_64/lib/Qt6Core.prl \
@@ -546,7 +549,10 @@ Makefile: Hospital_reorganized.pro ../../../software/Qt/6.10.1/mingw_64/mkspecs/
 ../../../software/Qt/6.10.1/mingw_64/mkspecs/features/lex.prf:
 Hospital_reorganized.pro:
 ../../../software/Qt/6.10.1/mingw_64/lib/Qt6PrintSupport.prl:
+../../../software/Qt/6.10.1/mingw_64/lib/Qt6Charts.prl:
+../../../software/Qt/6.10.1/mingw_64/lib/Qt6OpenGLWidgets.prl:
 ../../../software/Qt/6.10.1/mingw_64/lib/Qt6Widgets.prl:
+../../../software/Qt/6.10.1/mingw_64/lib/Qt6OpenGL.prl:
 ../../../software/Qt/6.10.1/mingw_64/lib/Qt6Gui.prl:
 ../../../software/Qt/6.10.1/mingw_64/lib/Qt6Sql.prl:
 ../../../software/Qt/6.10.1/mingw_64/lib/Qt6Core.prl:

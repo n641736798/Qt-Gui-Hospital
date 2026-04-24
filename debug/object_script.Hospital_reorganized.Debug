@@ -1,5 +1,6 @@
 debug/main.o
 debug/mainwindow.o
+debug/mainwindow_chart.o
 debug/databasemanager.o
 debug/patientdialog.o
 debug/ecgdatathread.o
@@ -9,6 +10,8 @@ debug/medicalrecorddialog.o
 debug/qcustomplot.o
 debug/patientmodel.o
 debug/patientwidget.o
+debug/qcustomplotchart_adapter.o
+debug/qtchart_adapter.o
 debug/qrc_resources.o
 debug/moc_mainwindow.o
 debug/moc_databasemanager.o
@@ -20,3 +23,6 @@ debug/moc_medicalrecorddialog.o
 debug/moc_qcustomplot.o
 debug/moc_patientmodel.o
 debug/moc_patientwidget.o
+debug/moc_iecgchart.o
+debug/moc_qcustomplotchart_adapter.o
+debug/moc_qtchart_adapter.o
