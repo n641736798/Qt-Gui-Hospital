@@ -1,10 +1,10 @@
 {
   "mvc": {
-    "patients": true,
-    "medical_records": true
+    "patients": false,
+    "medical_records": false
   },
   "lazy_loading": {
-    "enabled": true,
+    "enabled": false,
     "patient_page_size": 20,
     "medical_record_page_size": 20
   },

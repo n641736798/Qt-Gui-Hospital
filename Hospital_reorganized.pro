@@ -3,16 +3,13 @@ QT += core gui sql printsupport charts
 # printsupport: QCustomPlot uses QPrinter (PDF/print export)
 
 # OpenCV 4.12 支持（医学影像查看功能）
+# 使用重新编译的 MinGW 15.2.0 版本
 win32 {
-    OPENCV_PATH = D:/software/openCV/opencv/build
+    OPENCV_PATH = D:/software/opencv-mingw1520
     INCLUDEPATH += $$OPENCV_PATH/include
     
-    # 根据构建类型选择 Debug 或 Release 库
-    CONFIG(debug, debug|release) {
-        LIBS += -L$$OPENCV_PATH/x64/vc16/lib -lopencv_world4120d
-    } else {
-        LIBS += -L$$OPENCV_PATH/x64/vc16/lib -lopencv_world4120
-    }
+    # MinGW 版本的 OpenCV 库路径
+    LIBS += -L$$OPENCV_PATH/x64/mingw/lib -lopencv_world4120
 }
 unix {
     CONFIG += link_pkgconfig
@@ -48,10 +45,9 @@ SOURCES += \
     src/patientmodel.cpp \
     src/patientwidget.cpp \
     src/qcustomplotchart_adapter.cpp \
-    src/qtchart_adapter.cpp
-# OpenCV 文件（需要安装 OpenCV 后才能编译）
-# src/medicalimageviewer.cpp
-# src/imageviewerdialog.cpp
+    src/qtchart_adapter.cpp \
+    src/medicalimageviewer.cpp \
+    src/imageviewerdialog.cpp
 
 # 头文件路径（qcustomplot.h 须在 HEADERS 中，以便对 Q_OBJECT/signals 运行 MOC）
 HEADERS += \
@@ -67,10 +63,9 @@ HEADERS += \
     include/patientwidget.h \
     include/iecgchart.h \
     include/qcustomplotchart_adapter.h \
-    include/qtchart_adapter.h
-# OpenCV 头文件（需要安装 OpenCV 后才能编译）
-# include/medicalimageviewer.h
-# include/imageviewerdialog.h
+    include/qtchart_adapter.h \
+    include/medicalimageviewer.h \
+    include/imageviewerdialog.h
 
 # UI文件路径
 FORMS += \

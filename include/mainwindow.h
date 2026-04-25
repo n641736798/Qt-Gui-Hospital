@@ -21,6 +21,7 @@
 #include "patientwidget.h"
 #include "qcustomplot.h"
 #include "iecgchart.h"
+#include "imageviewerdialog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -48,6 +49,7 @@ private slots:
     void on_homeButton_clicked();
     void on_appointmentsButton_clicked();
     void on_medicalRecordsButton_clicked();
+    void on_imageViewerButton_clicked();
 
     // Database and patient management slots
     void onAddPatientClicked();
@@ -105,6 +107,9 @@ private:
     QPushButton *addPatientBtn;
     QPushButton *editPatientBtn;
     QPushButton *deletePatientBtn;
+
+    // Image viewer button (dynamically added to sidebar)
+    QPushButton *imageViewerButton = nullptr;
 
     // 病历管理：MVC 时为 MedicalRecordWidget，非 MVC 时为带 QTableWidget 的容器
     MedicalRecordWidget *medicalRecordWidget = nullptr;

@@ -64,6 +64,50 @@ MainWindow::MainWindow(QWidget *parent)
     setupECGDashboard();
     setupECGThread();
 
+    // 动态添加医学影像按钮到侧边栏（在 spacer 前面）
+    imageViewerButton = new QPushButton(this);
+    imageViewerButton->setText("医学影像");
+    imageViewerButton->setLayoutDirection(Qt::LeftToRight);
+    imageViewerButton->setStyleSheet(R"(
+        QPushButton {
+            background-color: transparent;
+            border: none;
+            color: #94A3B8;
+            padding: 15px 20px;
+            border-radius: 0px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 2px 8px;
+            border-left: 3px solid transparent;
+        }
+        QPushButton:hover {
+            background-color: #334155;
+            color: #F1F5F9;
+        }
+        QPushButton:pressed,
+        QPushButton:checked {
+            background-color: #2563EB;
+            color: #FFFFFF;
+            border-left: 3px solid #60A5FA;
+        }
+    )");
+
+    int spacerIndex = -1;
+    for (int i = 0; i < ui->sidebarLayout->count(); ++i) {
+        QLayoutItem *item = ui->sidebarLayout->itemAt(i);
+        if (item && item->spacerItem()) {
+            spacerIndex = i;
+            break;
+        }
+    }
+    if (spacerIndex >= 0) {
+        ui->sidebarLayout->insertWidget(spacerIndex, imageViewerButton);
+    } else {
+        ui->sidebarLayout->insertWidget(ui->sidebarLayout->count() - 1, imageViewerButton);
+    }
+    connect(imageViewerButton, &QPushButton::clicked, this, &MainWindow::on_imageViewerButton_clicked);
+
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 
     // Set initial page to home
@@ -956,6 +1000,7 @@ void MainWindow::onToggleButtonClicked()
             << ui->patientsButton
             << ui->medicalRecordsButton
             << ui->appointmentsButton
+            << imageViewerButton
             << ui->settingsButton;
     
     for (QPushButton* button : buttons) {
@@ -976,6 +1021,8 @@ void MainWindow::onToggleButtonClicked()
                 button->setText("病历管理");
             } else if (button == ui->appointmentsButton) {
                 button->setText("预约管理");
+            } else if (button == imageViewerButton) {
+                button->setText("医学影像");
             } else if (button == ui->settingsButton) {
                 button->setText("系统设置");
             }
@@ -1057,6 +1104,12 @@ void MainWindow::on_appointmentsButton_clicked()
 void MainWindow::on_medicalRecordsButton_clicked()
 {
     ui->contentStackWidget->setCurrentWidget(medicalRecordsStackPage);
+}
+
+void MainWindow::on_imageViewerButton_clicked()
+{
+    ImageViewerDialog dialog(this);
+    dialog.exec();
 }
 
 bool MainWindow::createDatabaseIfNotExists(const QString &host, const QString &username, const QString &password)

@@ -201,21 +201,31 @@ void MedicalImageViewer::setupConnections()
 
 bool MedicalImageViewer::loadImage(const QString &filePath)
 {
+    qDebug() << "[DEBUG] loadImage START:" << filePath;
     m_originalMat = cv::imread(filePath.toStdString(), cv::IMREAD_UNCHANGED);
+    qDebug() << "[DEBUG] cv::imread done. empty?" << m_originalMat.empty()
+             << "size:" << m_originalMat.cols << "x" << m_originalMat.rows
+             << "channels:" << m_originalMat.channels()
+             << "type:" << m_originalMat.type();
     if (m_originalMat.empty()) {
         qDebug() << "Failed to load image:" << filePath;
         return false;
     }
-    
+
     // 转换为 RGB 格式
+    qDebug() << "[DEBUG] Converting color space...";
     if (m_originalMat.channels() == 3) {
         cv::cvtColor(m_originalMat, m_originalMat, cv::COLOR_BGR2RGB);
     } else if (m_originalMat.channels() == 4) {
         cv::cvtColor(m_originalMat, m_originalMat, cv::COLOR_BGRA2RGBA);
     }
-    
+    qDebug() << "[DEBUG] Color conversion done. new type:" << m_originalMat.type();
+
+    qDebug() << "[DEBUG] Calling resetAdjustments...";
     resetAdjustments();
+    qDebug() << "[DEBUG] resetAdjustments done. Emitting signal...";
     emit imageLoaded(filePath);
+    qDebug() << "[DEBUG] loadImage END";
     return true;
 }
 
@@ -325,56 +335,81 @@ void MedicalImageViewer::clearAnnotations()
 
 void MedicalImageViewer::applyAdjustments()
 {
-    if (m_originalMat.empty()) return;
-    
+    qDebug() << "[DEBUG] applyAdjustments START";
+    if (m_originalMat.empty()) {
+        qDebug() << "[DEBUG] originalMat empty, returning";
+        return;
+    }
+
     // 复制原始图像
+    qDebug() << "[DEBUG] Cloning originalMat...";
     m_processedMat = m_originalMat.clone();
-    
+    qDebug() << "[DEBUG] Clone done. type:" << m_processedMat.type();
+
     // 应用亮度和对比度调整
     double alpha = m_contrast / 100.0;
     int beta = m_brightness;
-    
+    qDebug() << "[DEBUG] Applying convertTo alpha=" << alpha << "beta=" << beta;
     m_processedMat.convertTo(m_processedMat, -1, alpha, beta);
-    
+    qDebug() << "[DEBUG] convertTo done";
+
     // 裁剪到有效范围
+    qDebug() << "[DEBUG] Converting to CV_8U...";
     cv::Mat temp;
     m_processedMat.convertTo(temp, CV_8U);
     m_processedMat = temp;
-    
+    qDebug() << "[DEBUG] CV_8U conversion done. type:" << m_processedMat.type();
+
     // 应用旋转
     if (m_rotation != 0) {
+        qDebug() << "[DEBUG] Applying rotation:" << m_rotation;
         cv::Point2f center(m_processedMat.cols / 2.0f, m_processedMat.rows / 2.0f);
         cv::Mat rotMatrix = cv::getRotationMatrix2D(center, m_rotation, 1.0);
         cv::warpAffine(m_processedMat, m_processedMat, rotMatrix, m_processedMat.size());
+        qDebug() << "[DEBUG] Rotation done";
     }
-    
+
     // 应用翻转
     if (m_flipH) {
+        qDebug() << "[DEBUG] Flipping horizontal";
         cv::flip(m_processedMat, m_processedMat, 1);
     }
     if (m_flipV) {
+        qDebug() << "[DEBUG] Flipping vertical";
         cv::flip(m_processedMat, m_processedMat, 0);
     }
-    
+
+    qDebug() << "[DEBUG] Calling updateDisplay...";
     updateDisplay();
+    qDebug() << "[DEBUG] applyAdjustments END";
 }
 
 void MedicalImageViewer::updateDisplay()
 {
-    if (m_processedMat.empty()) return;
-    
+    qDebug() << "[DEBUG] updateDisplay START";
+    if (m_processedMat.empty()) {
+        qDebug() << "[DEBUG] processedMat empty, returning";
+        return;
+    }
+
     // 转换为 QImage
+    qDebug() << "[DEBUG] Converting to QImage...";
     m_displayImage = CvMatToQImage(m_processedMat);
-    
+    qDebug() << "[DEBUG] CvMatToQImage done. QImage isNull?" << m_displayImage.isNull()
+             << "size:" << m_displayImage.size();
+
     // 应用缩放
-    if (m_zoomFactor != 1.0) {
+    if (m_zoomFactor != 1.0 && !m_displayImage.isNull()) {
+        qDebug() << "[DEBUG] Scaling to factor:" << m_zoomFactor;
         int newWidth = static_cast<int>(m_displayImage.width() * m_zoomFactor);
         int newHeight = static_cast<int>(m_displayImage.height() * m_zoomFactor);
         m_displayImage = m_displayImage.scaled(newWidth, newHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        qDebug() << "[DEBUG] Scaling done";
     }
-    
+
     // 绘制标注
-    if (!m_annotations.isEmpty()) {
+    if (!m_annotations.isEmpty() && !m_displayImage.isNull()) {
+        qDebug() << "[DEBUG] Drawing annotations...";
         QPainter painter(&m_displayImage);
         painter.setPen(QPen(Qt::red, 2, Qt::SolidLine));
         for (const QRect &rect : m_annotations) {
@@ -386,10 +421,18 @@ void MedicalImageViewer::updateDisplay()
             );
             painter.drawRect(scaledRect);
         }
+        qDebug() << "[DEBUG] Annotations drawn";
     }
-    
-    m_imageLabel->setPixmap(QPixmap::fromImage(m_displayImage));
-    m_imageLabel->resize(m_displayImage.size());
+
+    qDebug() << "[DEBUG] Setting pixmap...";
+    if (!m_displayImage.isNull()) {
+        m_imageLabel->setPixmap(QPixmap::fromImage(m_displayImage));
+        m_imageLabel->resize(m_displayImage.size());
+        qDebug() << "[DEBUG] Pixmap set. label size:" << m_imageLabel->size();
+    } else {
+        qDebug() << "[DEBUG] displayImage is null, skipping pixmap set";
+    }
+    qDebug() << "[DEBUG] updateDisplay END";
 }
 
 cv::Mat MedicalImageViewer::QImageToCvMat(const QImage &image)
@@ -411,17 +454,31 @@ cv::Mat MedicalImageViewer::QImageToCvMat(const QImage &image)
 
 QImage MedicalImageViewer::CvMatToQImage(const cv::Mat &mat)
 {
+    qDebug() << "[DEBUG] CvMatToQImage called. type:" << mat.type()
+             << "size:" << mat.cols << "x" << mat.rows
+             << "step:" << mat.step;
+    QImage result;
     switch (mat.type()) {
     case CV_8UC3:
-        return QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
+        qDebug() << "[DEBUG] Using Format_RGB888";
+        result = QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
+        break;
     case CV_8UC4:
-        return QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_ARGB32);
+        qDebug() << "[DEBUG] Using Format_ARGB32";
+        result = QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_ARGB32);
+        break;
     case CV_8UC1:
-        return QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_Grayscale8);
+        qDebug() << "[DEBUG] Using Format_Grayscale8";
+        result = QImage(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_Grayscale8);
+        break;
     default:
-        qDebug() << "Unsupported cv::Mat type:" << mat.type();
+        qDebug() << "[DEBUG] Unsupported cv::Mat type:" << mat.type();
         return QImage();
     }
+    qDebug() << "[DEBUG] Creating deep copy of QImage...";
+    result = result.copy();
+    qDebug() << "[DEBUG] Deep copy done. result isNull?" << result.isNull();
+    return result;
 }
 
 void MedicalImageViewer::mousePressEvent(QMouseEvent *event)
