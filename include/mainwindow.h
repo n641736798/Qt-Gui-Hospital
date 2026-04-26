@@ -22,6 +22,8 @@
 #include "qcustomplot.h"
 #include "iecgchart.h"
 #include "imageviewerdialog.h"
+#include "documentscannerdialog.h"
+#include "morphologydialog.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -50,6 +52,8 @@ private slots:
     void on_appointmentsButton_clicked();
     void on_medicalRecordsButton_clicked();
     void on_imageViewerButton_clicked();
+    void on_documentScannerButton_clicked();
+    void on_morphologyButton_clicked();
 
     // Database and patient management slots
     void onAddPatientClicked();
@@ -110,6 +114,12 @@ private:
 
     // Image viewer button (dynamically added to sidebar)
     QPushButton *imageViewerButton = nullptr;
+
+    // Document scanner button (dynamically added to sidebar)
+    QPushButton *documentScannerButton = nullptr;
+
+    // Morphology button (dynamically added to sidebar)
+    QPushButton *morphologyButton = nullptr;
 
     // 病历管理：MVC 时为 MedicalRecordWidget，非 MVC 时为带 QTableWidget 的容器
     MedicalRecordWidget *medicalRecordWidget = nullptr;

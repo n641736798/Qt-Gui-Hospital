@@ -1,15 +1,15 @@
 <RCC>
     <qresource prefix="/img">
-        <file>maximize.svg</file>
-        <file>minus.svg</file>
-        <file>x.svg</file>
-        <file>Appointments.png</file>
-        <file>Dashboard.png</file>
-        <file>Patients.png</file>
-        <file>Settings.png</file>
-        <file>Report.png</file>
-        <file>health.png</file>
-        <file>cursor.png</file>
-        <file>Department.png</file>
+        <file>icons/maximize.svg</file>
+        <file>icons/minus.svg</file>
+        <file>icons/x.svg</file>
+        <file>icons/Appointments.png</file>
+        <file>icons/Dashboard.png</file>
+        <file>icons/Patients.png</file>
+        <file>icons/Settings.png</file>
+        <file>icons/Report.png</file>
+        <file>icons/health.png</file>
+        <file>icons/cursor.png</file>
+        <file>icons/Department.png</file>
     </qresource>
 </RCC>

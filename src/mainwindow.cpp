@@ -110,6 +110,82 @@ MainWindow::MainWindow(QWidget *parent)
     }
     connect(imageViewerButton, &QPushButton::clicked, this, &MainWindow::on_imageViewerButton_clicked);
 
+    // 动态添加文档扫描按钮到侧边栏（在 spacer 前面）
+    documentScannerButton = new QPushButton(this);
+    documentScannerButton->setText("文档扫描");
+    documentScannerButton->setIcon(QIcon(":/img/Report.png"));
+    documentScannerButton->setIconSize(QSize(24, 24));
+    documentScannerButton->setLayoutDirection(Qt::LeftToRight);
+    documentScannerButton->setStyleSheet(R"(
+        QPushButton {
+            background-color: transparent;
+            border: none;
+            color: #94A3B8;
+            padding: 15px 20px;
+            border-radius: 0px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 2px 8px;
+            border-left: 3px solid transparent;
+        }
+        QPushButton:hover {
+            background-color: #334155;
+            color: #F1F5F9;
+        }
+        QPushButton:pressed,
+        QPushButton:checked {
+            background-color: #2563EB;
+            color: #FFFFFF;
+            border-left: 3px solid #60A5FA;
+        }
+    )");
+
+    if (spacerIndex >= 0) {
+        ui->sidebarLayout->insertWidget(spacerIndex, documentScannerButton);
+    } else {
+        ui->sidebarLayout->insertWidget(ui->sidebarLayout->count() - 1, documentScannerButton);
+    }
+    connect(documentScannerButton, &QPushButton::clicked, this, &MainWindow::on_documentScannerButton_clicked);
+
+    // 动态添加形态学操作按钮到侧边栏（在 spacer 前面）
+    morphologyButton = new QPushButton(this);
+    morphologyButton->setText("形态学操作");
+    morphologyButton->setIcon(QIcon(":/img/Department.png"));
+    morphologyButton->setIconSize(QSize(24, 24));
+    morphologyButton->setLayoutDirection(Qt::LeftToRight);
+    morphologyButton->setStyleSheet(R"(
+        QPushButton {
+            background-color: transparent;
+            border: none;
+            color: #94A3B8;
+            padding: 15px 20px;
+            border-radius: 0px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 2px 8px;
+            border-left: 3px solid transparent;
+        }
+        QPushButton:hover {
+            background-color: #334155;
+            color: #F1F5F9;
+        }
+        QPushButton:pressed,
+        QPushButton:checked {
+            background-color: #2563EB;
+            color: #FFFFFF;
+            border-left: 3px solid #60A5FA;
+        }
+    )");
+
+    if (spacerIndex >= 0) {
+        ui->sidebarLayout->insertWidget(spacerIndex, morphologyButton);
+    } else {
+        ui->sidebarLayout->insertWidget(ui->sidebarLayout->count() - 1, morphologyButton);
+    }
+    connect(morphologyButton, &QPushButton::clicked, this, &MainWindow::on_morphologyButton_clicked);
+
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 
     // Set initial page to home
@@ -1111,6 +1187,18 @@ void MainWindow::on_medicalRecordsButton_clicked()
 void MainWindow::on_imageViewerButton_clicked()
 {
     ImageViewerDialog dialog(this);
+    dialog.exec();
+}
+
+void MainWindow::on_documentScannerButton_clicked()
+{
+    DocumentScannerDialog dialog(this);
+    dialog.exec();
+}
+
+void MainWindow::on_morphologyButton_clicked()
+{
+    MorphologyDialog dialog(this);
     dialog.exec();
 }
 
