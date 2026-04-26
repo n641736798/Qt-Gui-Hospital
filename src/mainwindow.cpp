@@ -67,6 +67,8 @@ MainWindow::MainWindow(QWidget *parent)
     // 动态添加医学影像按钮到侧边栏（在 spacer 前面）
     imageViewerButton = new QPushButton(this);
     imageViewerButton->setText("医学影像");
+    imageViewerButton->setIcon(QIcon(":/img/Department.png"));
+    imageViewerButton->setIconSize(QSize(24, 24));
     imageViewerButton->setLayoutDirection(Qt::LeftToRight);
     imageViewerButton->setStyleSheet(R"(
         QPushButton {

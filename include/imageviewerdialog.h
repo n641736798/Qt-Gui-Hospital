@@ -6,7 +6,6 @@
 class MedicalImageViewer;
 class QPushButton;
 class QLabel;
-class QLineEdit;
 
 class ImageViewerDialog : public QDialog
 {
@@ -32,7 +31,6 @@ private:
     QPushButton *m_openBtn;
     QPushButton *m_saveBtn;
     QLabel *m_infoLabel;
-    QLineEdit *m_patientIdEdit;
     QString m_currentFilePath;
 };
 

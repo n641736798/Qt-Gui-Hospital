@@ -10,5 +10,6 @@
         <file>Report.png</file>
         <file>health.png</file>
         <file>cursor.png</file>
+        <file>Department.png</file>
     </qresource>
 </RCC>

@@ -50,31 +50,27 @@ signals:
     void zoomChanged(double factor);
 
 protected:
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;
-    void paintEvent(QPaintEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     void setupUI();
     void setupConnections();
     void updateDisplay();
     void applyAdjustments();
-    
+
     // OpenCV 图像处理
     cv::Mat QImageToCvMat(const QImage &image);
     QImage CvMatToQImage(const cv::Mat &mat);
-    
+
     // 成员变量
     QLabel *m_imageLabel;
     QScrollArea *m_scrollArea;
-    
+
     // 原始图像和处理后的图像
     cv::Mat m_originalMat;
     cv::Mat m_processedMat;
     QImage m_displayImage;
-    
+
     // 调整参数
     int m_brightness = 0;
     int m_contrast = 100;
@@ -82,13 +78,19 @@ private:
     int m_rotation = 0;
     bool m_flipH = false;
     bool m_flipV = false;
-    
+
     // 标注
     bool m_annotationEnabled = false;
     QList<QRect> m_annotations;
     QPoint m_annotationStart;
     bool m_isDrawing = false;
-    
+
+    // 拖拽平移
+    bool m_isPanning = false;
+    QPoint m_panStartPos;
+    int m_panStartHValue = 0;
+    int m_panStartVValue = 0;
+
     // UI 控件
     QSlider *m_brightnessSlider;
     QSlider *m_contrastSlider;

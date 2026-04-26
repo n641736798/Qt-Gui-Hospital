@@ -4,6 +4,7 @@
 #include <QSlider>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
@@ -80,16 +81,20 @@ void MedicalImageViewer::setupUI()
 
     // 左侧：图像显示区域
     m_scrollArea = new QScrollArea(this);
-    m_scrollArea->setWidgetResizable(true);
+    m_scrollArea->setWidgetResizable(false);
+    m_scrollArea->setAlignment(Qt::AlignCenter);
     m_scrollArea->setStyleSheet("background-color: #1E1E1E; border: 1px solid #444444;");
-    
+
     m_imageLabel = new QLabel(this);
     m_imageLabel->setAlignment(Qt::AlignCenter);
     m_imageLabel->setStyleSheet("background-color: #1E1E1E;");
     m_imageLabel->setMinimumSize(400, 400);
     m_imageLabel->setText("暂无图像\n请点击打开图像按钮加载医学影像");
-    
+    m_imageLabel->setMouseTracking(true);
+
     m_scrollArea->setWidget(m_imageLabel);
+    m_scrollArea->viewport()->installEventFilter(this);
+    m_imageLabel->installEventFilter(this);
     mainLayout->addWidget(m_scrollArea, 1);
 
     // 右侧：控制面板
@@ -295,13 +300,13 @@ void MedicalImageViewer::resetAdjustments()
 
 void MedicalImageViewer::rotateLeft()
 {
-    m_rotation = (m_rotation - 90) % 360;
+    m_rotation = (m_rotation + 90) % 360;
     applyAdjustments();
 }
 
 void MedicalImageViewer::rotateRight()
 {
-    m_rotation = (m_rotation + 90) % 360;
+    m_rotation = (m_rotation - 90) % 360;
     applyAdjustments();
 }
 
@@ -321,9 +326,9 @@ void MedicalImageViewer::enableAnnotation(bool enable)
 {
     m_annotationEnabled = enable;
     if (enable) {
-        setCursor(Qt::CrossCursor);
+        m_scrollArea->viewport()->setCursor(Qt::CrossCursor);
     } else {
-        setCursor(Qt::ArrowCursor);
+        m_scrollArea->viewport()->setCursor(Qt::ArrowCursor);
     }
 }
 
@@ -481,53 +486,72 @@ QImage MedicalImageViewer::CvMatToQImage(const cv::Mat &mat)
     return result;
 }
 
-void MedicalImageViewer::mousePressEvent(QMouseEvent *event)
+bool MedicalImageViewer::eventFilter(QObject *watched, QEvent *event)
 {
-    if (m_annotationEnabled && event->button() == Qt::LeftButton) {
-        m_isDrawing = true;
-        m_annotationStart = event->pos();
+    if (watched == m_scrollArea->viewport() || watched == m_imageLabel) {
+        if (event->type() == QEvent::MouseButtonPress) {
+            QMouseEvent *me = static_cast<QMouseEvent*>(event);
+            if (me->button() == Qt::LeftButton) {
+                if (m_annotationEnabled) {
+                    m_isDrawing = true;
+                    m_annotationStart = m_imageLabel->mapFromGlobal(me->globalPosition().toPoint());
+                    return true;
+                } else {
+                    m_isPanning = true;
+                    m_panStartPos = me->globalPosition().toPoint();
+                    m_panStartHValue = m_scrollArea->horizontalScrollBar()->value();
+                    m_panStartVValue = m_scrollArea->verticalScrollBar()->value();
+                    m_scrollArea->viewport()->setCursor(Qt::ClosedHandCursor);
+                    return true;
+                }
+            }
+        } else if (event->type() == QEvent::MouseMove) {
+            QMouseEvent *me = static_cast<QMouseEvent*>(event);
+            if (m_isDrawing && m_annotationEnabled) {
+                return true;
+            } else if (m_isPanning) {
+                QPoint delta = me->globalPosition().toPoint() - m_panStartPos;
+                m_scrollArea->horizontalScrollBar()->setValue(m_panStartHValue - delta.x());
+                m_scrollArea->verticalScrollBar()->setValue(m_panStartVValue - delta.y());
+                return true;
+            }
+        } else if (event->type() == QEvent::MouseButtonRelease) {
+            QMouseEvent *me = static_cast<QMouseEvent*>(event);
+            if (me->button() == Qt::LeftButton) {
+                if (m_isDrawing && m_annotationEnabled) {
+                    m_isDrawing = false;
+                    QPoint end = m_imageLabel->mapFromGlobal(me->globalPosition().toPoint());
+                    QRect rect(m_annotationStart, end);
+                    rect = rect.normalized();
+                    QRect originalRect(
+                        static_cast<int>(rect.x() / m_zoomFactor),
+                        static_cast<int>(rect.y() / m_zoomFactor),
+                        static_cast<int>(rect.width() / m_zoomFactor),
+                        static_cast<int>(rect.height() / m_zoomFactor)
+                    );
+                    m_annotations.append(originalRect);
+                    updateDisplay();
+                    return true;
+                } else if (m_isPanning) {
+                    m_isPanning = false;
+                    if (m_annotationEnabled) {
+                        m_scrollArea->viewport()->setCursor(Qt::CrossCursor);
+                    } else {
+                        m_scrollArea->viewport()->setCursor(Qt::ArrowCursor);
+                    }
+                    return true;
+                }
+            }
+        } else if (event->type() == QEvent::Wheel) {
+            if (m_processedMat.empty()) {
+                return false;
+            }
+            QWheelEvent *we = static_cast<QWheelEvent*>(event);
+            double delta = we->angleDelta().y() / 120.0;
+            double newFactor = m_zoomFactor * (delta > 0 ? 1.1 : 0.9);
+            setZoom(newFactor);
+            return true;
+        }
     }
-}
-
-void MedicalImageViewer::mouseMoveEvent(QMouseEvent *event)
-{
-    if (m_isDrawing && m_annotationEnabled) {
-        // 实时显示绘制效果（可选）
-    }
-}
-
-void MedicalImageViewer::mouseReleaseEvent(QMouseEvent *event)
-{
-    if (m_isDrawing && m_annotationEnabled) {
-        m_isDrawing = false;
-        
-        QPoint end = event->pos();
-        QRect rect(m_annotationStart, end);
-        rect = rect.normalized();
-        
-        // 转换到原始图像坐标
-        QRect originalRect(
-            static_cast<int>(rect.x() / m_zoomFactor),
-            static_cast<int>(rect.y() / m_zoomFactor),
-            static_cast<int>(rect.width() / m_zoomFactor),
-            static_cast<int>(rect.height() / m_zoomFactor)
-        );
-        
-        m_annotations.append(originalRect);
-        updateDisplay();
-    }
-}
-
-void MedicalImageViewer::wheelEvent(QWheelEvent *event)
-{
-    if (m_processedMat.empty()) return;
-    
-    double delta = event->angleDelta().y() / 120.0;
-    double newFactor = m_zoomFactor * (delta > 0 ? 1.1 : 0.9);
-    setZoom(newFactor);
-}
-
-void MedicalImageViewer::paintEvent(QPaintEvent *event)
-{
-    QWidget::paintEvent(event);
+    return QWidget::eventFilter(watched, event);
 }

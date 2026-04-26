@@ -64,11 +64,6 @@ void ImageViewerDialog::setupUI()
     // 顶部工具栏
     QHBoxLayout *toolbarLayout = new QHBoxLayout();
     
-    QLabel *patientLabel = new QLabel("患者编号:", this);
-    m_patientIdEdit = new QLineEdit(this);
-    m_patientIdEdit->setPlaceholderText("输入患者编号关联影像");
-    m_patientIdEdit->setMaximumWidth(150);
-    
     m_openBtn = new QPushButton("打开图像", this);
     m_saveBtn = new QPushButton("保存图像", this);
     m_saveBtn->setEnabled(false);
@@ -76,9 +71,6 @@ void ImageViewerDialog::setupUI()
     m_infoLabel = new QLabel("未加载图像", this);
     m_infoLabel->setStyleSheet("color: #666666;");
     
-    toolbarLayout->addWidget(patientLabel);
-    toolbarLayout->addWidget(m_patientIdEdit);
-    toolbarLayout->addSpacing(20);
     toolbarLayout->addWidget(m_openBtn);
     toolbarLayout->addWidget(m_saveBtn);
     toolbarLayout->addStretch();
