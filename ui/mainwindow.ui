@@ -412,7 +412,7 @@ QScrollBar::sub-line:horizontal {
          </property>
          <property name="icon">
           <iconset resource="resources.qrc">
-           <normaloff>:/img/health.png</normaloff>:/img/health.png</iconset>
+           <normaloff>:/img/icons/health.png</normaloff>:/img/icons/health.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -432,7 +432,7 @@ QScrollBar::sub-line:horizontal {
          </property>
          <property name="icon">
           <iconset resource="resources.qrc">
-           <normaloff>:/img/Dashboard.png</normaloff>:/img/Dashboard.png</iconset>
+           <normaloff>:/img/icons/Dashboard.png</normaloff>:/img/icons/Dashboard.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -452,7 +452,7 @@ QScrollBar::sub-line:horizontal {
          </property>
          <property name="icon">
           <iconset resource="resources.qrc">
-           <normaloff>:/img/Patients.png</normaloff>:/img/Patients.png</iconset>
+           <normaloff>:/img/icons/Patients.png</normaloff>:/img/icons/Patients.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -472,7 +472,7 @@ QScrollBar::sub-line:horizontal {
          </property>
          <property name="icon">
           <iconset resource="resources.qrc">
-           <normaloff>:/img/Report.png</normaloff>:/img/Report.png</iconset>
+           <normaloff>:/img/icons/Report.png</normaloff>:/img/icons/Report.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -492,7 +492,7 @@ QScrollBar::sub-line:horizontal {
          </property>
          <property name="icon">
           <iconset resource="resources.qrc">
-           <normaloff>:/img/Appointments.png</normaloff>:/img/Appointments.png</iconset>
+           <normaloff>:/img/icons/Appointments.png</normaloff>:/img/icons/Appointments.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -525,7 +525,7 @@ QScrollBar::sub-line:horizontal {
          </property>
          <property name="icon">
           <iconset resource="resources.qrc">
-           <normaloff>:/img/Settings.png</normaloff>:/img/Settings.png</iconset>
+           <normaloff>:/img/icons/Settings.png</normaloff>:/img/icons/Settings.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -597,7 +597,7 @@ QScrollBar::sub-line:horizontal {
             </property>
             <property name="icon">
              <iconset resource="resources.qrc">
-              <normaloff>:/img/minus.svg</normaloff>:/img/minus.svg</iconset>
+              <normaloff>:/img/icons/minus.svg</normaloff>:/img/icons/minus.svg</iconset>
             </property>
            </widget>
           </item>
@@ -614,7 +614,7 @@ QScrollBar::sub-line:horizontal {
             </property>
             <property name="icon">
              <iconset resource="resources.qrc">
-              <normaloff>:/img/maximize.svg</normaloff>:/img/maximize.svg</iconset>
+              <normaloff>:/img/icons/maximize.svg</normaloff>:/img/icons/maximize.svg</iconset>
             </property>
            </widget>
           </item>
@@ -625,7 +625,7 @@ QScrollBar::sub-line:horizontal {
             </property>
             <property name="icon">
              <iconset resource="resources.qrc">
-              <normaloff>:/img/x.svg</normaloff>:/img/x.svg</iconset>
+              <normaloff>:/img/icons/x.svg</normaloff>:/img/icons/x.svg</iconset>
             </property>
            </widget>
           </item>

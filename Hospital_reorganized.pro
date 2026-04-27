@@ -47,6 +47,7 @@ SOURCES += \
     src/chart/qtchart_adapter.cpp \
     src/image/medicalimageviewer.cpp \
     src/image/imageviewerdialog.cpp \
+    src/image/documentscannerdialog.cpp \
     src/image/morphologydialog.cpp \
     src/third_party/qcustomplot.cpp
 
@@ -66,6 +67,7 @@ HEADERS += \
     include/chart/qtchart_adapter.h \
     include/image/medicalimageviewer.h \
     include/image/imageviewerdialog.h \
+    include/image/documentscannerdialog.h \
     include/image/morphologydialog.h \
     include/third_party/qcustomplot.h
 

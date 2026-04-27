@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 动态添加医学影像按钮到侧边栏（在 spacer 前面）
     imageViewerButton = new QPushButton(this);
     imageViewerButton->setText("医学影像");
-    imageViewerButton->setIcon(QIcon(":/img/Department.png"));
+    imageViewerButton->setIcon(QIcon(":/img/icons/Department.png"));
     imageViewerButton->setIconSize(QSize(24, 24));
     imageViewerButton->setLayoutDirection(Qt::LeftToRight);
     imageViewerButton->setStyleSheet(R"(
@@ -113,7 +113,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 动态添加文档扫描按钮到侧边栏（在 spacer 前面）
     documentScannerButton = new QPushButton(this);
     documentScannerButton->setText("文档扫描");
-    documentScannerButton->setIcon(QIcon(":/img/Report.png"));
+    documentScannerButton->setIcon(QIcon(":/img/icons/Report.png"));
     documentScannerButton->setIconSize(QSize(24, 24));
     documentScannerButton->setLayoutDirection(Qt::LeftToRight);
     documentScannerButton->setStyleSheet(R"(
@@ -151,7 +151,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 动态添加形态学操作按钮到侧边栏（在 spacer 前面）
     morphologyButton = new QPushButton(this);
     morphologyButton->setText("形态学操作");
-    morphologyButton->setIcon(QIcon(":/img/Department.png"));
+    morphologyButton->setIcon(QIcon(":/img/icons/Department.png"));
     morphologyButton->setIconSize(QSize(24, 24));
     morphologyButton->setLayoutDirection(Qt::LeftToRight);
     morphologyButton->setStyleSheet(R"(

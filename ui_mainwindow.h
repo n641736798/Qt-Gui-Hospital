@@ -467,7 +467,7 @@ public:
         toggleButton->setObjectName("toggleButton");
         toggleButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon;
-        icon.addFile(QString::fromUtf8(":/img/health.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon.addFile(QString::fromUtf8(":/img/icons/health.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         toggleButton->setIcon(icon);
         toggleButton->setIconSize(QSize(24, 24));
 
@@ -477,7 +477,7 @@ public:
         homeButton->setObjectName("homeButton");
         homeButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon1;
-        icon1.addFile(QString::fromUtf8(":/img/Dashboard.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon1.addFile(QString::fromUtf8(":/img/icons/Dashboard.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         homeButton->setIcon(icon1);
         homeButton->setIconSize(QSize(24, 24));
 
@@ -487,7 +487,7 @@ public:
         patientsButton->setObjectName("patientsButton");
         patientsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon2;
-        icon2.addFile(QString::fromUtf8(":/img/Patients.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon2.addFile(QString::fromUtf8(":/img/icons/Patients.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         patientsButton->setIcon(icon2);
         patientsButton->setIconSize(QSize(24, 24));
 
@@ -497,7 +497,7 @@ public:
         medicalRecordsButton->setObjectName("medicalRecordsButton");
         medicalRecordsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon3;
-        icon3.addFile(QString::fromUtf8(":/img/Report.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon3.addFile(QString::fromUtf8(":/img/icons/Report.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         medicalRecordsButton->setIcon(icon3);
         medicalRecordsButton->setIconSize(QSize(28, 28));
 
@@ -507,7 +507,7 @@ public:
         appointmentsButton->setObjectName("appointmentsButton");
         appointmentsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon4;
-        icon4.addFile(QString::fromUtf8(":/img/Appointments.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon4.addFile(QString::fromUtf8(":/img/icons/Appointments.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         appointmentsButton->setIcon(icon4);
         appointmentsButton->setIconSize(QSize(24, 24));
 
@@ -521,7 +521,7 @@ public:
         settingsButton->setObjectName("settingsButton");
         settingsButton->setLayoutDirection(Qt::LayoutDirection::LeftToRight);
         QIcon icon5;
-        icon5.addFile(QString::fromUtf8(":/img/Settings.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon5.addFile(QString::fromUtf8(":/img/icons/Settings.png"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         settingsButton->setIcon(icon5);
         settingsButton->setIconSize(QSize(24, 24));
 
@@ -552,7 +552,7 @@ public:
         pushButton_3 = new QPushButton(topbar);
         pushButton_3->setObjectName("pushButton_3");
         QIcon icon6;
-        icon6.addFile(QString::fromUtf8(":/img/minus.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon6.addFile(QString::fromUtf8(":/img/icons/minus.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_3->setIcon(icon6);
 
         horizontalLayout_2->addWidget(pushButton_3);
@@ -561,7 +561,7 @@ public:
         pushButton_2->setObjectName("pushButton_2");
         pushButton_2->setMaximumSize(QSize(16777215, 16777215));
         QIcon icon7;
-        icon7.addFile(QString::fromUtf8(":/img/maximize.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon7.addFile(QString::fromUtf8(":/img/icons/maximize.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         pushButton_2->setIcon(icon7);
 
         horizontalLayout_2->addWidget(pushButton_2);
@@ -569,7 +569,7 @@ public:
         close = new QPushButton(topbar);
         close->setObjectName("close");
         QIcon icon8;
-        icon8.addFile(QString::fromUtf8(":/img/x.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
+        icon8.addFile(QString::fromUtf8(":/img/icons/x.svg"), QSize(), QIcon::Mode::Normal, QIcon::State::Off);
         close->setIcon(icon8);
 
         horizontalLayout_2->addWidget(close);

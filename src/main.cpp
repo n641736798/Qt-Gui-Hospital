@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         }
     )");
 
-    QPixmap originalCursorPixmap(":/img/cursor.png");
+    QPixmap originalCursorPixmap(":/img/icons/cursor.png");
 
     if (originalCursorPixmap.isNull()) {
         qDebug() << "Error: Could not load cursor image.";
